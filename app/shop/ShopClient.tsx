@@ -15,7 +15,7 @@ export default function ShopClient() {
 
     const searchParams = useSearchParams();
     const router = useRouter();
-    const searchQuery = searchParams.get("search")?.toLowerCase().trim() || "";
+    const searchQuery = searchParams?.get("search")?.toLowerCase().trim() || "";
 
     useEffect(() => {
         Promise.all([

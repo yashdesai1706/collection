@@ -11,7 +11,7 @@ import { ArrowLeft } from "lucide-react";
 export default function EditProductPage() {
     const router = useRouter();
     const params = useParams();
-    const id = params.id as string;
+    const id = (params?.id as string) || '';
     const { user } = useAuthStore();
 
     const [product, setProduct] = useState<any>(null);
