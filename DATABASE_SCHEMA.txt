@@ -1,0 +1,281 @@
+================================================================================
+PRITI'S COLLECTION - COMPLETE DATABASE SCHEMA SPECIFICATION
+================================================================================
+Database Engine   : MongoDB (MongoDB Atlas)
+Object Data Modeler: Mongoose (v9.1.5)
+Database Name     : pritis-collection
+Models / Schemas  : 3 Core Collections (users, products, orders)
+Generated On      : 2026-09-25
+================================================================================
+
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1. ENTITY RELATIONSHIP OVERVIEW
+2. SCHEMA: USERS (User.js -> Collection: 'users')
+3. SCHEMA: PRODUCTS (Product.js -> Collection: 'products')
+4. SCHEMA: ORDERS (Order.js -> Collection: 'orders')
+5. INDEXES, CONSTRAINTS & DATA INTEGRITY
+6. MONGOOSE MIDDLEWARE & CUSTOM METHODS
+7. SAMPLE JSON DOCUMENTS FOR EACH COLLECTION
+
+
+================================================================================
+1. ENTITY RELATIONSHIP OVERVIEW
+================================================================================
+
+[User] (1) <----------------------- (Many) [Order]
+  _id (ObjectId) <------------------------- user (ObjectId, ref: 'User')
+
+[Product] (1) <-------------------- (Many) [Order.orderItems]
+  _id (ObjectId) <------------------------- orderItems[].product (ObjectId, ref: 'Product')
+
+
+Summary of References:
+- An Order belongs to exactly one User (referenced by Order.user).
+- An Order contains one or more line items (Order.orderItems[]), each referencing
+  the corresponding Product (Order.orderItems[].product).
+- All collections maintain automatic timestamps (createdAt, updatedAt).
+
+
+================================================================================
+2. SCHEMA: USERS (User.js -> Collection: 'users')
+================================================================================
+
+Description: Stores registered customers, boutique staff, and administrators.
+
+--------------------------------------------------------------------------------
+Field Name        | Type     | Required | Default | Notes / Constraints
+--------------------------------------------------------------------------------
+_id               | ObjectId | Yes      | auto    | Primary Key
+name              | String   | Yes      | -       | Full customer / admin name
+email             | String   | Yes      | -       | Unique index, lowercase email
+password          | String   | Yes      | -       | Hashed with bcrypt (10 salt rounds)
+isAdmin           | Boolean  | No       | false   | Grants access to /admin dashboard
+address           | Object   | No       | {}      | Embedded subdocument
+address.street    | String   | No       | -       | Street address / house / apartment
+address.city      | String   | No       | -       | City name
+address.state     | String   | No       | -       | State / Province
+address.postalCode| String   | No       | -       | PIN / Postal code
+address.country   | String   | No       | -       | Country (e.g. "India")
+createdAt         | Date     | Yes      | auto    | Timestamp of registration
+updatedAt         | Date     | Yes      | auto    | Timestamp of last profile update
+--------------------------------------------------------------------------------
+
+Mongoose Model Definition:
+  File: backend/models/User.js
+  Collection Name: 'users' (Mongoose auto-pluralizes 'User')
+
+
+================================================================================
+3. SCHEMA: PRODUCTS (Product.js -> Collection: 'products')
+================================================================================
+
+Description: Stores boutique inventory including Sarees, Anarkalis, Kurtis, and Dresses.
+
+--------------------------------------------------------------------------------
+Field Name        | Type     | Required | Default | Notes / Constraints
+--------------------------------------------------------------------------------
+_id               | ObjectId | Yes      | auto    | Primary Key
+name              | String   | Yes      | -       | Product title (e.g. "Royal Red Banarasi Silk Saree")
+slug              | String   | Yes      | -       | URL slug (Unique index, kebab-case)
+description       | String   | Yes      | -       | Full rich text / fabric description
+price             | Number   | Yes      | -       | Selling price in INR (₹)
+category          | String   | Yes      | -       | Category: "Sarees", "Kurtis", "Dresses"
+stock             | Number   | Yes      | 0       | Available stock count (inventory)
+image             | String   | Yes      | -       | Primary thumbnail image URL or path
+images            | [String] | No       | []      | Array of gallery image URLs
+colors            | [String] | No       | []      | Available colors (e.g. ["Red", "Gold"])
+sizes             | [String] | No       | []      | Available sizes (e.g. ["Free Size"], ["S","M","L","XL"])
+fabric            | String   | No       | -       | Material type (e.g. "Silk", "Georgette", "Velvet")
+isBestSeller      | Boolean  | No       | false   | Flag for homepage / featured badges
+createdAt         | Date     | Yes      | auto    | Timestamp of catalog addition
+updatedAt         | Date     | Yes      | auto    | Timestamp of last edit / stock update
+--------------------------------------------------------------------------------
+
+Mongoose Model Definition:
+  File: backend/models/Product.js
+  Collection Name: 'products' (Mongoose auto-pluralizes 'Product')
+
+
+================================================================================
+4. SCHEMA: ORDERS (Order.js -> Collection: 'orders')
+================================================================================
+
+Description: Stores customer purchase orders, line items, delivery addresses, and payment receipts.
+
+--------------------------------------------------------------------------------
+Field Name                | Type     | Required | Default     | Notes / Constraints
+--------------------------------------------------------------------------------
+_id                       | ObjectId | Yes      | auto        | Primary Key
+user                      | ObjectId | Yes      | -           | Foreign Key -> users._id
+orderItems                | [Object] | Yes      | []          | Array of purchased items
+orderItems[].name         | String   | Yes      | -           | Item title snapshot at purchase
+orderItems[].qty          | Number   | Yes      | -           | Quantity purchased
+orderItems[].image        | String   | Yes      | -           | Product thumbnail snapshot
+orderItems[].price        | Number   | Yes      | -           | Unit price snapshot at purchase (INR)
+orderItems[].product      | ObjectId | Yes      | -           | Foreign Key -> products._id
+shippingAddress           | Object   | Yes      | -           | Destination shipping details
+shippingAddress.address   | String   | Yes      | -           | Street / building
+shippingAddress.city      | String   | Yes      | -           | City
+shippingAddress.postalCode| String   | Yes      | -           | PIN / Zip code
+shippingAddress.country   | String   | Yes      | -           | Country (e.g. "India")
+paymentMethod             | String   | Yes      | -           | "Razorpay" or "COD"
+paymentResult             | Object   | No       | {}          | Gateway transaction payload
+paymentResult.id          | String   | No       | -           | Razorpay payment ID (e.g. "pay_...")
+paymentResult.status      | String   | No       | -           | "success", "captured"
+paymentResult.update_time | String   | No       | -           | Timestamp from gateway
+paymentResult.email_address|String  | No       | -           | Customer billing email
+paymentResult.razorpay_order_id|String|No       | -           | Razorpay order ID (e.g. "order_...")
+itemsPrice                | Number   | Yes      | 0.0         | Sum of (price * qty) for all items
+taxPrice                  | Number   | Yes      | 0.0         | GST / Tax calculated (e.g. 18%)
+shippingPrice             | Number   | Yes      | 0.0         | Shipping fee (0 if above free threshold)
+totalPrice                | Number   | Yes      | 0.0         | Final charged amount (items + tax + shipping)
+isPaid                    | Boolean  | Yes      | false       | true if Razorpay paid or COD collected
+paidAt                    | Date     | No       | -           | Timestamp when payment confirmed
+isDelivered               | Boolean  | Yes      | false       | true once parcel delivered to customer
+deliveredAt               | Date     | No       | -           | Timestamp when order delivered
+status                    | String   | No       | "Processing"| "Processing", "Shipped", "Delivered", "Cancelled"
+createdAt                 | Date     | Yes      | auto        | Timestamp of order placement
+updatedAt                 | Date     | Yes      | auto        | Timestamp of status change
+--------------------------------------------------------------------------------
+
+Mongoose Model Definition:
+  File: backend/models/Order.js
+  Collection Name: 'orders' (Mongoose auto-pluralizes 'Order')
+
+
+================================================================================
+5. INDEXES, CONSTRAINTS & DATA INTEGRITY
+================================================================================
+
+1. Collection 'users':
+   - `_id`: Default unique clustered index.
+   - `email`: Unique secondary index (`unique: true`). Prevents duplicate customer accounts.
+
+2. Collection 'products':
+   - `_id`: Default unique clustered index.
+   - `slug`: Unique secondary index (`unique: true`). Guarantees clean, clash-free SEO URLs
+     for single product pages (/product/[slug]).
+
+3. Collection 'orders':
+   - `_id`: Default unique clustered index.
+   - `user`: Foreign key reference to User model. Used by `/api/orders/myorders`.
+   - `orderItems[].product`: Foreign key reference to Product model.
+
+
+================================================================================
+6. MONGOOSE MIDDLEWARE & CUSTOM METHODS
+================================================================================
+
+User Model (backend/models/User.js):
+-----------------------------------
+1. Pre-Save Middleware Hook (`userSchema.pre('save')`):
+   - Automatically executes before saving a User document.
+   - Checks if the `password` field was modified (`this.isModified('password')`).
+   - If modified or newly created, generates a bcrypt salt with 10 rounds and hashes
+     the plaintext password before writing to MongoDB.
+
+2. Instance Method (`userSchema.methods.matchPassword`):
+   - Signature: `async matchPassword(enteredPassword: string): Promise<boolean>`
+   - Compares an incoming plain-text login password against the hashed password stored
+     in the document using `bcrypt.compare()`. Returns true if valid.
+
+
+================================================================================
+7. SAMPLE JSON DOCUMENTS FOR EACH COLLECTION
+================================================================================
+
+--------------------------------------------------------------------------------
+Sample Document: Collection 'users'
+--------------------------------------------------------------------------------
+{
+  "_id": { "$oid": "660c1a2b3c4d5e6f7a8b9c01" },
+  "name": "Yash Desai",
+  "email": "customer@example.com",
+  "password": "$2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1boR6JdeKE8.7dG9xKnmYfG5ZpY.w6",
+  "isAdmin": false,
+  "address": {
+    "street": "123 MG Road",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "postalCode": "411001",
+    "country": "India"
+  },
+  "createdAt": { "$date": "2026-09-20T10:15:30.000Z" },
+  "updatedAt": { "$date": "2026-09-20T10:15:30.000Z" },
+  "__v": 0
+}
+
+--------------------------------------------------------------------------------
+Sample Document: Collection 'products'
+--------------------------------------------------------------------------------
+{
+  "_id": { "$oid": "660c1b3c4d5e6f7a8b9c0201" },
+  "name": "Royal Red Banarasi Silk Saree",
+  "slug": "royal-red-banarasi-silk-saree",
+  "description": "Handwoven Banarasi silk saree with intricate zari work. Perfect for weddings and special occasions. This royal red drape features traditional motifs and a heavy border.",
+  "price": 12999,
+  "category": "Sarees",
+  "stock": 10,
+  "image": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=2574&auto=format&fit=crop",
+  "images": [
+    "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=2574&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=2574&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1596704017254-9b121068fb31?q=80&w=2574&auto=format&fit=crop"
+  ],
+  "colors": ["Red", "Gold"],
+  "sizes": ["Free Size"],
+  "fabric": "Silk",
+  "isBestSeller": true,
+  "createdAt": { "$date": "2026-09-21T08:00:00.000Z" },
+  "updatedAt": { "$date": "2026-09-21T08:00:00.000Z" },
+  "__v": 0
+}
+
+--------------------------------------------------------------------------------
+Sample Document: Collection 'orders'
+--------------------------------------------------------------------------------
+{
+  "_id": { "$oid": "660c1c4d5e6f7a8b9c030101" },
+  "user": { "$oid": "660c1a2b3c4d5e6f7a8b9c01" },
+  "orderItems": [
+    {
+      "name": "Royal Red Banarasi Silk Saree",
+      "qty": 1,
+      "image": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=2574&auto=format&fit=crop",
+      "price": 12999,
+      "product": { "$oid": "660c1b3c4d5e6f7a8b9c0201" }
+    }
+  ],
+  "shippingAddress": {
+    "address": "123 MG Road",
+    "city": "Pune",
+    "postalCode": "411001",
+    "country": "India"
+  },
+  "paymentMethod": "Razorpay",
+  "paymentResult": {
+    "id": "pay_OXYZ1234567890",
+    "status": "success",
+    "update_time": "2026-09-22T14:32:00.000Z",
+    "email_address": "customer@example.com",
+    "razorpay_order_id": "order_OABC9876543210"
+  },
+  "itemsPrice": 12999.00,
+  "taxPrice": 2339.82,
+  "shippingPrice": 0.00,
+  "totalPrice": 15338.82,
+  "isPaid": true,
+  "paidAt": { "$date": "2026-09-22T14:32:05.000Z" },
+  "isDelivered": false,
+  "deliveredAt": null,
+  "status": "Processing",
+  "createdAt": { "$date": "2026-09-22T14:30:00.000Z" },
+  "updatedAt": { "$date": "2026-09-22T14:32:05.000Z" },
+  "__v": 0
+}
+
+================================================================================
+END OF DATABASE SCHEMA SPECIFICATION
+================================================================================
