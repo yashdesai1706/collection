@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Subcategory = require('../models/Subcategory');
+const { uploadToCloudinary } = require('../config/cloudinary');
 
 const toSlug = (name) =>
     name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -93,9 +94,9 @@ const createProduct = async (req, res) => {
     try {
         const { name, price, description, category, subcategory, slug, variants } = req.body;
 
-        let image = '/uploads/sample.jpg';
+        let image = 'https://placehold.co/600x800';
         if (req.file) {
-            image = `/uploads/products/${req.file.filename}`;
+            image = await uploadToCloudinary(req.file.buffer, 'pritis_collection/products');
         } else if (req.body.image) {
             image = req.body.image;
         }
@@ -156,7 +157,11 @@ const updateProduct = async (req, res) => {
         if (category !== undefined) product.category = await resolveCategoryId(category);
         if (subcategory !== undefined) product.subcategory = subcategory || null;
         if (slug !== undefined) product.slug = slug;
-        if (req.file) product.image = `/uploads/products/${req.file.filename}`;
+        if (req.file) {
+            product.image = await uploadToCloudinary(req.file.buffer, 'pritis_collection/products');
+        } else if (req.body.image !== undefined) {
+            product.image = req.body.image;
+        }
 
         if (variants !== undefined) {
             let parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
