@@ -1,27 +1,27 @@
 require('dotenv').config();
-const cloudinary = require('cloudinary').v2;
+const { uploadToCloudinary } = require('../config/cloudinary');
+const assert = require('assert');
 
-const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-const apiKey = process.env.CLOUDINARY_API_KEY;
-const apiSecret = process.env.CLOUDINARY_API_SECRET;
+async function testUpload() {
+    console.log('--- Testing Cloudinary Buffer Stream Upload ---');
+    
+    // 1x1 transparent PNG buffer
+    const samplePngBuffer = Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        'base64'
+    );
 
-// Also test using CLOUDINARY_URL
-process.env.CLOUDINARY_URL = `cloudinary://${apiKey}:${apiSecret}@${cloudName}`;
-cloudinary.config({
-    cloud_name: cloudName,
-    api_key: apiKey,
-    api_secret: apiSecret,
-    secure: true,
-});
+    const uploadedUrl = await uploadToCloudinary(samplePngBuffer, 'pritis_collection/products');
+    console.log('Uploaded Image URL:', uploadedUrl);
 
-async function checkAccount() {
-    try {
-        console.log('Fetching account usage details...');
-        const usage = await cloudinary.api.usage();
-        console.log('Usage details:', usage);
-    } catch (e) {
-        console.error('Usage Error:', e);
-    }
+    assert(typeof uploadedUrl === 'string', 'URL must be a string');
+    assert(uploadedUrl.startsWith('https://res.cloudinary.com/'), 'URL must start with https://res.cloudinary.com/');
+    assert(uploadedUrl.includes('pritis_collection/products'), 'URL must be in products folder');
+
+    console.log('✅ ALL CLOUDINARY CHECKS PASSED SUCCESSFULLY!');
 }
 
-checkAccount();
+testUpload().catch(err => {
+    console.error('❌ Upload failed:', err);
+    process.exit(1);
+});
