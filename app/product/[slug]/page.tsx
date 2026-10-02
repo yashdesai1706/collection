@@ -442,7 +442,7 @@ export default function ProductDetail() {
                     <div className="pt-4 border-t border-gray-200 space-y-2 text-sm text-gray-500">
                         <p><span className="font-semibold text-foreground">Fabric:</span> {product.fabric || "Premium Quality"}</p>
                         <p><span className="font-semibold text-foreground">Care:</span> Dry Clean Only</p>
-                        <p><span className="font-semibold text-foreground">Shipping:</span> Free shipping across India</p>
+                        <p><span className="font-semibold text-foreground">Shipping:</span> Free delivery on orders over ₹1,999</p>
                     </div>
                 </div>
             </div>

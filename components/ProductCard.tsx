@@ -2,11 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ShoppingBag, Heart, Check } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
-import { Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface ProductProps {
@@ -27,7 +25,7 @@ interface ProductProps {
             price: number | null;
             image?: string | null;
         }>;
-    }
+    };
 }
 
 export default function ProductCard({ product }: ProductProps) {
@@ -35,6 +33,7 @@ export default function ProductCard({ product }: ProductProps) {
     const { wishlistItems, addToWishlist, removeFromWishlist } = useWishlistStore();
     const [isWishlisted, setIsWishlisted] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
+    const [justAdded, setJustAdded] = useState(false);
 
     useEffect(() => {
         setIsHydrated(true);
@@ -58,19 +57,20 @@ export default function ProductCard({ product }: ProductProps) {
                 name: product.name,
                 image: product.image,
                 price: product.price,
-                stock: 10, // Default fallback
-                slug: product.slug
+                stock: 10,
+                slug: product.slug,
             });
         }
     };
 
-    const handleAddToCart = () => {
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
         const firstVariant = product.variants?.[0];
         const stock = firstVariant ? firstVariant.stock : (product.stock ?? 10);
-        if (stock <= 0) {
-            alert(`${product.name} is currently out of stock`);
-            return;
-        }
+        if (stock <= 0) return;
+
         addToCart({
             _id: product._id || String(product.id),
             variantId: firstVariant?._id || product._id || String(product.id),
@@ -83,68 +83,121 @@ export default function ProductCard({ product }: ProductProps) {
             color: firstVariant?.color || undefined,
             slug: product.slug,
         });
-        alert(`${product.name} added to cart!`);
+
+        setJustAdded(true);
+        setTimeout(() => setJustAdded(false), 1800);
     };
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-    // Remove /api suffix if present to get the base URL
     const baseUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
 
     const imageUrl = product.image?.startsWith('http')
         ? product.image
         : `${baseUrl}${product.image?.startsWith('/') ? '' : '/'}${product.image}`;
 
+    const categoryName = typeof product.category === 'object' && product.category !== null
+        ? product.category.name
+        : product.category || 'Ethnic Wear';
+
+    const firstVariant = product.variants?.[0];
+    const totalStock = product.stock ?? firstVariant?.stock ?? 10;
+    const isOutOfStock = totalStock <= 0;
+
     return (
-        <div className="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            {/* Image Container */}
-            <div className="aspect-[3/4] w-full bg-gray-200 relative overflow-hidden">
+        <div className="group relative bg-white rounded-xl overflow-hidden border border-[#E8E1F0] shadow-2xs hover:shadow-md hover:border-secondary/30 transition-all duration-300 flex flex-col">
+            {/* Image Container with 3:4 Aspect Ratio */}
+            <Link href={`/product/${product.slug}`} className="block relative aspect-[3/4] w-full bg-cream overflow-hidden">
                 <Image
-                    src={imageUrl || "/placeholder.jpg"}
+                    src={imageUrl || "/logo.jpg"}
                     alt={product.name}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out"
+                    unoptimized={imageUrl.startsWith('http')}
                 />
 
+                {/* Stock Tag */}
+                {isOutOfStock && (
+                    <span className="absolute top-3 left-3 bg-red-800 text-white text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full tracking-wider shadow-xs">
+                        Sold Out
+                    </span>
+                )}
+
+                {/* Wishlist Button */}
                 <button
+                    type="button"
                     onClick={toggleWishlist}
-                    className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 transition-colors shadow-sm z-10"
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-white shadow-xs transition-colors z-10"
+                    aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                 >
-                    <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} className={isWishlisted ? "text-red-500" : ""} />
+                    <Heart
+                        size={16}
+                        fill={isWishlisted ? "#DC2626" : "none"}
+                        className={isWishlisted ? "text-red-600" : ""}
+                    />
                 </button>
 
-                {/* Overlay Actions - Desktop Hover / Mobile Visible */}
-                <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-center bg-gradient-to-t from-black/50 to-transparent">
-                    <button
-                        onClick={handleAddToCart}
-                        className="bg-white text-primary px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 hover:bg-primary hover:text-white transition-colors shadow-lg active:scale-95"
-                    >
-                        <ShoppingBag size={16} />
-                        Add to Cart
-                    </button>
-                </div>
-            </div>
+                {/* Slide-Up Desktop Quick Add Action */}
+                {!isOutOfStock && (
+                    <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden sm:flex justify-center bg-gradient-to-t from-black/50 via-black/25 to-transparent">
+                        <button
+                            type="button"
+                            onClick={handleAddToCart}
+                            disabled={justAdded}
+                            className={`w-full py-2.5 px-4 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 ${
+                                justAdded
+                                    ? "bg-emerald-700 text-white"
+                                    : "bg-white text-primary hover:bg-primary hover:text-cream"
+                            }`}
+                        >
+                            {justAdded ? (
+                                <>
+                                    <Check size={14} /> Added to Bag
+                                </>
+                            ) : (
+                                <>
+                                    <ShoppingBag size={14} /> Quick Add
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
+            </Link>
 
-            {/* Details */}
-            <div className="p-4 space-y-2">
-                <p className="text-xs text-secondary font-medium uppercase tracking-wider">
-                    {typeof product.category === 'object' && product.category !== null ? product.category.name : product.category}
-                </p>
-                <Link href={`/product/${product.slug}`} className="block group-hover:text-primary transition-colors">
-                    <h3 className="font-serif text-lg font-medium text-primary line-clamp-1">
-                        {product.name}
-                    </h3>
-                </Link>
-                <div className="flex items-center justify-between">
-                    <p className="font-sans text-foreground/80 font-semibold text-lg">
+            {/* Product Meta Details */}
+            <div className="p-4 flex-1 flex flex-col justify-between space-y-2 bg-white">
+                <div>
+                    <span className="text-[10px] uppercase tracking-widest text-secondary font-medium block">
+                        {categoryName}
+                    </span>
+                    <Link href={`/product/${product.slug}`} className="block group-hover:text-primary transition-colors">
+                        <h3 className="font-serif text-sm sm:text-base font-medium text-gray-900 line-clamp-1 mt-0.5">
+                            {product.name}
+                        </h3>
+                    </Link>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                    <p className="font-serif text-base font-bold text-primary">
                         ₹{product.price.toLocaleString('en-IN')}
                     </p>
-                    {/* Mobile Cart Button (Visible for better touch access) */}
-                    <button
-                        onClick={handleAddToCart}
-                        className="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary active:bg-primary active:text-white transition-colors"
-                    >
-                        <ShoppingBag size={16} />
-                    </button>
+
+                    {/* Mobile Quick Add Button */}
+                    {!isOutOfStock && (
+                        <button
+                            type="button"
+                            onClick={handleAddToCart}
+                            disabled={justAdded}
+                            className={`sm:hidden w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                                justAdded
+                                    ? "bg-emerald-700 text-white"
+                                    : "bg-primary/10 text-primary active:bg-primary active:text-white"
+                            }`}
+                            aria-label="Add to cart"
+                        >
+                            {justAdded ? <Check size={14} /> : <ShoppingBag size={14} />}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

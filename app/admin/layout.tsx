@@ -51,12 +51,9 @@ export default function AdminLayout({
     const navItems = [
         { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
         { name: "Products", href: "/admin/products", icon: ShoppingBag },
-        { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
-        { name: "Categories", href: "/admin/categories", icon: Tag },
-        { name: "Subcategories", href: "/admin/subcategories", icon: Layers },
-        { name: "Sizes", href: "/admin/sizes", icon: Layers },
-        { name: "Colors", href: "/admin/colors", icon: Tag },
-        { name: "Users", href: "/admin/users", icon: Users },
+        { name: "Orders & Fulfillment", href: "/admin/orders", icon: ShoppingCart },
+        { name: "Taxonomy & Attributes", href: "/admin/categories", icon: Tag },
+        { name: "Users & Staff", href: "/admin/users", icon: Users },
     ];
 
     return (

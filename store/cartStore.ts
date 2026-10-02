@@ -26,9 +26,13 @@ interface CartState {
     totalPrice: number;
 }
 
+import { SHIPPING_CONFIG } from '@/config/shippingConfig';
+
 const recalc = (items: CartItem[]) => {
     const itemsPrice = items.reduce((acc, item) => acc + item.price * item.qty, 0);
-    const shippingPrice = itemsPrice > 5000 ? 0 : 200;
+    const shippingPrice = (itemsPrice >= SHIPPING_CONFIG.FREE_SHIPPING_MIN || itemsPrice === 0) 
+        ? 0 
+        : SHIPPING_CONFIG.STANDARD_FEE;
     const totalPrice = itemsPrice + shippingPrice;
     return { itemsPrice, shippingPrice, totalPrice };
 };

@@ -108,9 +108,11 @@ async function calculateOrderSummary(rawItems) {
         });
     }
 
+const { SHIPPING_CONFIG } = require('../config/shippingConfig');
+
     // Recompute monetary totals from scratch on the server
     const itemsPrice = formattedOrderItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
-    const shippingPrice = itemsPrice > 5000 ? 0 : 200;
+    const shippingPrice = itemsPrice >= SHIPPING_CONFIG.FREE_SHIPPING_MIN ? 0 : SHIPPING_CONFIG.STANDARD_FEE;
     const taxPrice = 0;
     const totalPrice = itemsPrice + shippingPrice + taxPrice;
     const amountInPaise = Math.round(totalPrice * 100);
