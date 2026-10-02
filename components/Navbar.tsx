@@ -60,8 +60,8 @@ export default function Navbar() {
 
     return (
         <nav className="sticky top-0 z-50 bg-[#FDFBF7]/95 backdrop-blur-md border-b border-[#E8E1F0] w-full max-w-full">
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4 min-w-0">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="w-full flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4 min-w-0">
 
                     {/* ZONE 1: BRAND LOGO */}
                     <div className="flex-shrink-0 min-w-0">

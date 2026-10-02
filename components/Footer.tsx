@@ -4,8 +4,8 @@ import { Instagram, Youtube, ShieldCheck, Sparkles, Truck, Ruler } from "lucide-
 
 export default function Footer() {
     return (
-        <footer className="bg-primary-dark text-cream pt-16 pb-8 border-t border-secondary/20">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <footer className="w-full max-w-full bg-primary-dark text-cream pt-16 pb-8 border-t border-secondary/20">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {/* Trust Badges Strip */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pb-12 mb-12 border-b border-primary-light/30">

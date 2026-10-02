@@ -39,6 +39,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    width: 100%;
     max-width: 100%;
     overflow-x: hidden;
     -webkit-text-size-adjust: 100%;
@@ -48,9 +49,12 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    width: 100%;
     max-width: 100%;
     overflow-x: hidden;
     position: relative;
+    margin: 0;
+    padding: 0;
   }
 
   *,

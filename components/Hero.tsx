@@ -12,15 +12,15 @@ export default function Hero() {
             <div className="absolute top-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-secondary/10 rounded-full blur-2xl sm:blur-3xl pointer-events-none translate-x-1/4 -translate-y-1/4" />
             <div className="absolute bottom-0 left-0 w-56 sm:w-80 h-56 sm:h-80 bg-primary/5 rounded-full blur-2xl sm:blur-3xl pointer-events-none -translate-x-1/4 translate-y-1/4" />
 
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+            <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20">
+                <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
 
                     {/* Left Column: Brand Copy & Actions */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
-                        className="lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left"
+                        className="w-full lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left flex flex-col items-center lg:items-start"
                     >
                         <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white border border-secondary/30 shadow-2xs">
                             <Sparkles size={14} className="text-secondary" />
@@ -29,12 +29,12 @@ export default function Hero() {
                             </span>
                         </div>
 
-                        <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-primary leading-[1.15] tracking-tight break-words">
+                        <h1 className="w-full text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-primary leading-[1.15] tracking-tight break-words text-center lg:text-left">
                             Timeless Indian <br className="hidden sm:inline" />
                             <span className="italic font-normal text-secondary-dark">Ethnic Elegance</span>
                         </h1>
 
-                        <p className="text-sm sm:text-base text-foreground/70 max-w-xl mx-auto lg:mx-0 leading-relaxed font-sans">
+                        <p className="w-full text-sm sm:text-base text-foreground/70 max-w-xl mx-auto lg:mx-0 leading-relaxed font-sans text-center lg:text-left">
                             Handcrafted Banarasi silk sarees, embellished festive anarkalis, and bespoke bridal ensembles crafted by master artisans across India.
                         </p>
 
@@ -55,7 +55,7 @@ export default function Hero() {
                         </div>
 
                         {/* Subtle reassurance points */}
-                        <div className="pt-5 sm:pt-6 grid grid-cols-3 gap-2 sm:gap-4 border-t border-gray-200/80 text-center lg:text-left max-w-lg mx-auto lg:mx-0">
+                        <div className="w-full pt-5 sm:pt-6 grid grid-cols-3 gap-2 sm:gap-4 border-t border-gray-200/80 text-center lg:text-left max-w-lg mx-auto lg:mx-0">
                             <div>
                                 <p className="font-serif text-base sm:text-lg font-bold text-primary">100%</p>
                                 <p className="text-[10px] sm:text-[11px] text-foreground/60 leading-tight mt-0.5">Pure Handlooms</p>
@@ -76,7 +76,7 @@ export default function Hero() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.7, delay: 0.2 }}
-                        className="lg:col-span-5 relative"
+                        className="w-full lg:col-span-5 relative flex justify-center"
                     >
                         <div className="relative w-full max-w-md mx-auto aspect-[3/4] rounded-2xl overflow-hidden border border-secondary/30 shadow-xl bg-white">
                             <Image

@@ -53,12 +53,12 @@ export default function Home() {
     ];
 
     return (
-        <main className="min-h-screen bg-cream">
+        <div className="w-full min-h-screen bg-cream">
             {/* 1. Hero Section */}
             <Hero />
 
             {/* 2. Curated Categories Strip */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="text-center max-w-xl mx-auto mb-10">
                     <span className="text-xs uppercase tracking-widest text-secondary-dark font-medium">
                         Curated Categories
@@ -96,7 +96,7 @@ export default function Home() {
             </section>
 
             {/* 3. Featured Products Grid */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-[#E8E1F0]">
+            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-[#E8E1F0]">
                 <div className="flex flex-col sm:flex-row justify-between items-baseline mb-10 gap-3">
                     <div>
                         <span className="text-xs uppercase tracking-widest text-secondary-dark font-medium">
@@ -138,8 +138,8 @@ export default function Home() {
             </section>
 
             {/* 4. Craftsmanship Heritage Section */}
-            <section className="bg-white border-y border-[#E8E1F0] py-20 my-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section className="w-full bg-white border-y border-[#E8E1F0] py-20 my-12">
+                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div className="space-y-6">
                             <span className="text-xs uppercase tracking-widest text-secondary-dark font-medium flex items-center gap-1.5">
@@ -188,6 +188,6 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }
