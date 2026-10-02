@@ -7,29 +7,29 @@ import { motion } from "framer-motion";
 
 export default function Hero() {
     return (
-        <section className="relative w-full bg-cream overflow-hidden border-b border-[#E8E1F0]">
-            {/* Subtle background glow */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
+        <section className="relative w-full max-w-full bg-cream overflow-hidden border-b border-[#E8E1F0]">
+            {/* Subtle background glow - safely contained */}
+            <div className="absolute top-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-secondary/10 rounded-full blur-2xl sm:blur-3xl pointer-events-none translate-x-1/4 -translate-y-1/4" />
+            <div className="absolute bottom-0 left-0 w-56 sm:w-80 h-56 sm:h-80 bg-primary/5 rounded-full blur-2xl sm:blur-3xl pointer-events-none -translate-x-1/4 translate-y-1/4" />
 
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
 
                     {/* Left Column: Brand Copy & Actions */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
-                        className="lg:col-span-7 space-y-6 text-center lg:text-left"
+                        className="lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left"
                     >
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-secondary/30 shadow-2xs">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white border border-secondary/30 shadow-2xs">
                             <Sparkles size={14} className="text-secondary" />
-                            <span className="text-[11px] uppercase tracking-widest font-medium text-secondary-dark">
+                            <span className="text-[10px] sm:text-[11px] uppercase tracking-widest font-medium text-secondary-dark">
                                 Festive & Bridal Collection 2026
                             </span>
                         </div>
 
-                        <h1 className="text-4xl sm:text-6xl xl:text-7xl font-serif font-bold text-primary leading-[1.1] tracking-tight">
+                        <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-primary leading-[1.15] tracking-tight break-words">
                             Timeless Indian <br className="hidden sm:inline" />
                             <span className="italic font-normal text-secondary-dark">Ethnic Elegance</span>
                         </h1>
@@ -38,10 +38,10 @@ export default function Hero() {
                             Handcrafted Banarasi silk sarees, embellished festive anarkalis, and bespoke bridal ensembles crafted by master artisans across India.
                         </p>
 
-                        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 w-full">
                             <Link
                                 href="/shop"
-                                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-primary text-cream font-medium text-xs uppercase tracking-wider hover:bg-primary-light transition-all shadow-md flex items-center justify-center gap-2 group"
+                                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-primary text-cream font-medium text-xs uppercase tracking-wider hover:bg-primary-light transition-all shadow-md flex items-center justify-center gap-2 group text-center"
                             >
                                 <span>Shop The Collection</span>
                                 <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -55,18 +55,18 @@ export default function Hero() {
                         </div>
 
                         {/* Subtle reassurance points */}
-                        <div className="pt-6 grid grid-cols-3 gap-4 border-t border-gray-200/80 text-center lg:text-left max-w-lg mx-auto lg:mx-0">
+                        <div className="pt-5 sm:pt-6 grid grid-cols-3 gap-2 sm:gap-4 border-t border-gray-200/80 text-center lg:text-left max-w-lg mx-auto lg:mx-0">
                             <div>
-                                <p className="font-serif text-lg font-bold text-primary">100%</p>
-                                <p className="text-[11px] text-foreground/60">Pure Handlooms</p>
+                                <p className="font-serif text-base sm:text-lg font-bold text-primary">100%</p>
+                                <p className="text-[10px] sm:text-[11px] text-foreground/60 leading-tight mt-0.5">Pure Handlooms</p>
                             </div>
                             <div>
-                                <p className="font-serif text-lg font-bold text-primary">Custom</p>
-                                <p className="text-[11px] text-foreground/60">Bespoke Sizing</p>
+                                <p className="font-serif text-base sm:text-lg font-bold text-primary">Custom</p>
+                                <p className="text-[10px] sm:text-[11px] text-foreground/60 leading-tight mt-0.5">Bespoke Sizing</p>
                             </div>
                             <div>
-                                <p className="font-serif text-lg font-bold text-primary">Worldwide</p>
-                                <p className="text-[11px] text-foreground/60">Tracked Express</p>
+                                <p className="font-serif text-base sm:text-lg font-bold text-primary">Worldwide</p>
+                                <p className="text-[10px] sm:text-[11px] text-foreground/60 leading-tight mt-0.5">Tracked Express</p>
                             </div>
                         </div>
                     </motion.div>

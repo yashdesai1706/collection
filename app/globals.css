@@ -37,11 +37,26 @@
 
 /* Base Styles */
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    max-width: 100%;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    max-width: 100%;
     overflow-x: hidden;
+    position: relative;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
 
   h1,
@@ -52,10 +67,5 @@
   h6 {
     font-family: var(--font-serif);
     letter-spacing: -0.01em;
-  }
-
-  /* Smooth scroll behavior */
-  html {
-    scroll-behavior: smooth;
   }
 }

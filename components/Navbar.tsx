@@ -59,14 +59,14 @@ export default function Navbar() {
     ];
 
     return (
-        <nav className="sticky top-0 z-50 bg-[#FDFBF7]/95 backdrop-blur-md border-b border-[#E8E1F0]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-20 gap-4">
+        <nav className="sticky top-0 z-50 bg-[#FDFBF7]/95 backdrop-blur-md border-b border-[#E8E1F0] w-full max-w-full">
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4 min-w-0">
 
                     {/* ZONE 1: BRAND LOGO */}
-                    <div className="flex-shrink-0">
-                        <Link href="/" className="flex items-center gap-3 group">
-                            <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-secondary/30 bg-white shadow-xs group-hover:border-secondary transition-colors">
+                    <div className="flex-shrink-0 min-w-0">
+                        <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
+                            <div className="relative w-8 h-8 sm:w-11 sm:h-11 rounded-full overflow-hidden border border-secondary/30 bg-white shadow-xs group-hover:border-secondary transition-colors shrink-0">
                                 <Image
                                     src="/logo.jpg"
                                     alt="Priti's Collection"
@@ -75,11 +75,11 @@ export default function Navbar() {
                                     priority
                                 />
                             </div>
-                            <div className="flex flex-col">
-                                <span className="font-serif text-lg sm:text-2xl text-primary font-bold tracking-tight leading-none group-hover:text-primary-light transition-colors">
+                            <div className="flex flex-col min-w-0">
+                                <span className="font-serif text-base sm:text-xl md:text-2xl text-primary font-bold tracking-tight leading-none group-hover:text-primary-light transition-colors whitespace-nowrap">
                                     Priti&apos;s Collection
                                 </span>
-                                <span className="text-[9px] sm:text-[10px] tracking-[0.16em] uppercase text-secondary-dark font-medium mt-1">
+                                <span className="text-[8px] sm:text-[10px] tracking-[0.14em] uppercase text-secondary-dark font-medium mt-0.5 whitespace-nowrap hidden sm:block">
                                     Fashion That Defines You
                                 </span>
                             </div>
@@ -100,7 +100,7 @@ export default function Navbar() {
                     </div>
 
                     {/* ZONE 3: ACTIONS & UTILITIES */}
-                    <div className="flex items-center space-x-3 sm:space-x-4">
+                    <div className="flex items-center gap-1 sm:gap-2 md:gap-3 shrink-0">
                         {/* Desktop Search Input */}
                         <form onSubmit={handleSearch} className="hidden xl:flex items-center relative">
                             <input
@@ -113,18 +113,18 @@ export default function Navbar() {
                             <Search size={14} className="absolute left-3 text-foreground/40 pointer-events-none" />
                         </form>
 
-                        {/* Search Icon Button for Medium Screens */}
+                        {/* Search Icon Button for Mobile/Tablet */}
                         <div className="relative xl:hidden">
                             <button
                                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                                className="p-2 text-foreground/80 hover:text-primary transition-colors rounded-full hover:bg-black/5"
+                                className="p-1.5 sm:p-2 text-foreground/80 hover:text-primary transition-colors rounded-full hover:bg-black/5"
                                 aria-label="Search"
                             >
-                                <Search size={20} />
+                                <Search size={18} className="sm:w-5 sm:h-5" />
                             </button>
 
                             {isSearchOpen && (
-                                <div className="absolute right-0 top-full mt-2 w-72 bg-white p-3 rounded-xl shadow-lg border border-[#E8E1F0] z-50">
+                                <div className="fixed sm:absolute inset-x-4 top-18 sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 w-auto sm:w-72 bg-white p-3 rounded-xl shadow-lg border border-[#E8E1F0] z-50">
                                     <form onSubmit={handleSearch} className="relative">
                                         <input
                                             type="text"
@@ -150,12 +150,12 @@ export default function Navbar() {
                         {/* Wishlist Link */}
                         <Link
                             href="/wishlist"
-                            className="p-2 text-foreground/80 hover:text-primary transition-colors relative rounded-full hover:bg-black/5"
+                            className="p-1.5 sm:p-2 text-foreground/80 hover:text-primary transition-colors relative rounded-full hover:bg-black/5"
                             aria-label="Wishlist"
                         >
-                            <Heart size={20} />
+                            <Heart size={18} className="sm:w-5 sm:h-5" />
                             {mounted && wishlistItems.length > 0 && (
-                                <span className="absolute top-1 right-1 bg-primary text-cream text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                                <span className="absolute top-0.5 right-0.5 bg-primary text-cream text-[9px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center leading-none">
                                     {wishlistItems.length}
                                 </span>
                             )}
@@ -164,12 +164,12 @@ export default function Navbar() {
                         {/* Cart Link */}
                         <Link
                             href="/cart"
-                            className="p-2 text-foreground/80 hover:text-primary transition-colors relative rounded-full hover:bg-black/5"
+                            className="p-1.5 sm:p-2 text-foreground/80 hover:text-primary transition-colors relative rounded-full hover:bg-black/5"
                             aria-label="Shopping Cart"
                         >
-                            <ShoppingBag size={20} />
+                            <ShoppingBag size={18} className="sm:w-5 sm:h-5" />
                             {mounted && cartItems.length > 0 && (
-                                <span className="absolute top-1 right-1 bg-secondary text-primary font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                                <span className="absolute top-0.5 right-0.5 bg-secondary text-primary font-bold text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center leading-none">
                                     {cartItems.length}
                                 </span>
                             )}
@@ -230,10 +230,10 @@ export default function Navbar() {
                         {/* Mobile Menu Toggle */}
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="p-2 text-foreground/80 hover:text-primary transition-colors lg:hidden rounded-md"
+                            className="p-1.5 sm:p-2 text-foreground/80 hover:text-primary transition-colors lg:hidden rounded-md"
                             aria-label="Toggle navigation menu"
                         >
-                            {isOpen ? <X size={22} /> : <Menu size={22} />}
+                            {isOpen ? <X size={20} className="sm:w-6 sm:h-6" /> : <Menu size={20} className="sm:w-6 sm:h-6" />}
                         </button>
                     </div>
                 </div>
