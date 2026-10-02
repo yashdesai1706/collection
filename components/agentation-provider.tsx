@@ -8,8 +8,15 @@ const Agentation = dynamic(
 );
 
 export function AgentationProvider() {
-  if (process.env.NODE_ENV !== "development") {
+  const isEnabled =
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_ENABLE_AGENTATION === "true";
+
+  if (!isEnabled) {
     return null;
   }
-  return <Agentation />;
+
+  const endpoint = process.env.NEXT_PUBLIC_AGENTATION_ENDPOINT;
+
+  return <Agentation endpoint={endpoint} />;
 }
