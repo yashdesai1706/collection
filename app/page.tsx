@@ -5,7 +5,7 @@ import Link from "next/link";
 import Hero from "@/components/Hero";
 import ProductCard from "@/components/ProductCard";
 import { fetchProducts } from "@/lib/api";
-import { ArrowRight, Sparkles, Feather, Crown, HeartHandshake } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function Home() {
     const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
@@ -28,27 +28,27 @@ export default function Home() {
     const categories = [
         {
             title: "Royal Sarees",
-            subtitle: "Handwoven Banarasi & Kanjivaram",
+            subtitle: "Festive & Party Silk Sarees",
             href: "/shop?search=saree",
             badge: "Bestseller",
         },
         {
             title: "Festive Anarkalis",
-            subtitle: "Sequin & Zari Embellishments",
+            subtitle: "Embellished Party Suits & Gowns",
             href: "/shop?search=anarkali",
             badge: "Festive",
         },
         {
-            title: "Chanderi Kurtis",
-            subtitle: "Everyday Luxury Silhouettes",
+            title: "Designer Kurtis",
+            subtitle: "Daily & Occasion Wear",
             href: "/shop?search=kurti",
             badge: "Popular",
         },
         {
-            title: "Bridal Lehengas",
-            subtitle: "Bespoke Haute Ensembles",
+            title: "Party Wear",
+            subtitle: "Celebration Sets & Lehengas",
             href: "/shop?search=lehenga",
-            badge: "Bridal",
+            badge: "Trending",
         },
     ];
 
@@ -58,13 +58,13 @@ export default function Home() {
             <Hero />
 
             {/* 2. Curated Categories Strip */}
-            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
                 <div className="text-center max-w-xl mx-auto mb-10">
                     <span className="text-xs uppercase tracking-widest text-secondary-dark font-medium">
                         Curated Categories
                     </span>
                     <h2 className="text-3xl sm:text-4xl font-serif font-bold text-primary mt-1">
-                        Explore By Silhouette
+                        Explore By Category
                     </h2>
                 </div>
 
@@ -73,7 +73,7 @@ export default function Home() {
                         <Link
                             key={cat.title}
                             href={cat.href}
-                            className="group relative bg-white p-6 rounded-2xl border border-[#E8E1F0] shadow-2xs hover:shadow-md hover:border-secondary/40 transition-all duration-300 flex flex-col justify-between min-h-[170px]"
+                            className="group relative bg-white p-6 rounded-2xl border border-[#E8E1F0] shadow-2xs hover:shadow-md hover:border-secondary/40 transition-all duration-300 flex flex-col justify-between min-h-[160px]"
                         >
                             <div>
                                 <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-secondary/15 text-primary tracking-wide">
@@ -96,14 +96,14 @@ export default function Home() {
             </section>
 
             {/* 3. Featured Products Grid */}
-            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-[#E8E1F0]">
+            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20 border-t border-[#E8E1F0]">
                 <div className="flex flex-col sm:flex-row justify-between items-baseline mb-10 gap-3">
                     <div>
                         <span className="text-xs uppercase tracking-widest text-secondary-dark font-medium">
-                            Editor&apos;s Selection
+                            Fresh Collection
                         </span>
                         <h2 className="text-3xl sm:text-4xl font-serif font-bold text-primary mt-1">
-                            Signature Festive Arrivals
+                            Signature Arrivals
                         </h2>
                     </div>
                     <Link
@@ -135,58 +135,6 @@ export default function Home() {
                         </Link>
                     </div>
                 )}
-            </section>
-
-            {/* 4. Craftsmanship Heritage Section */}
-            <section className="w-full bg-white border-y border-[#E8E1F0] py-20 my-12">
-                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        <div className="space-y-6">
-                            <span className="text-xs uppercase tracking-widest text-secondary-dark font-medium flex items-center gap-1.5">
-                                <Sparkles size={14} className="text-secondary" /> Master Craftsmanship
-                            </span>
-                            <h2 className="text-3xl sm:text-5xl font-serif font-bold text-primary leading-tight">
-                                Handwoven Heritage, Crafted For Royalty
-                            </h2>
-                            <p className="text-sm sm:text-base text-foreground/70 leading-relaxed font-sans">
-                                Every saree in Priti&apos;s Collection represents weeks of meticulous handloom craftsmanship. We partner directly with master weavers in Varanasi, Chanderi, and Kanchipuram to preserve generational weaving techniques while presenting silhouettes tailored for contemporary celebrations.
-                            </p>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
-                                <div className="space-y-1">
-                                    <Feather size={20} className="text-secondary" />
-                                    <h4 className="font-serif font-bold text-sm text-gray-900">Pure Silks</h4>
-                                    <p className="text-xs text-foreground/60">Certified mulberry and katan silks with genuine zari.</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <Crown size={20} className="text-secondary" />
-                                    <h4 className="font-serif font-bold text-sm text-gray-900">Bespoke Fit</h4>
-                                    <p className="text-xs text-foreground/60">Custom fall, edging, and blouse stitching on demand.</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <HeartHandshake size={20} className="text-secondary" />
-                                    <h4 className="font-serif font-bold text-sm text-gray-900">Direct Artisans</h4>
-                                    <p className="text-xs text-foreground/60">Supporting generational weaver communities.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-cream rounded-2xl p-8 border border-secondary/20 space-y-6 text-center">
-                            <h3 className="font-serif text-2xl font-bold text-primary">
-                                Planning a Wedding or Special Celebration?
-                            </h3>
-                            <p className="text-sm text-foreground/70 max-w-md mx-auto">
-                                Our bespoke bridal styling team offers private consultations for matching sets, family trousseaus, and custom size tailoring.
-                            </p>
-                            <Link
-                                href="/contact"
-                                className="inline-block px-8 py-3.5 rounded-full bg-primary text-cream font-medium text-xs uppercase tracking-wider hover:bg-primary-light transition-all shadow-md"
-                            >
-                                Book A Bridal Consultation
-                            </Link>
-                        </div>
-                    </div>
-                </div>
             </section>
         </div>
     );
