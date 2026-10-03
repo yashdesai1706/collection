@@ -50,12 +50,13 @@ export default function EditProductPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center gap-4">
+            <div className="space-y-1">
                 <Link
                     href="/admin/products"
-                    className="p-2 bg-white rounded-lg border border-gray-200 text-gray-600 hover:text-gray-900 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-light transition-colors mb-1 group"
                 >
-                    <ArrowLeft size={18} />
+                    <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+                    <span>Back to Products</span>
                 </Link>
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Edit Product</h1>

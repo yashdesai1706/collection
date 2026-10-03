@@ -1,3 +1,4 @@
+require('dotenv').config();
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const Order = require('../models/Order');
@@ -6,11 +7,11 @@ const { calculateOrderSummary } = require('../utils/orderCalculator');
 
 // Initialize Razorpay instance from environment variables
 function getRazorpayInstance() {
-    const key_id = process.env.RAZORPAY_KEY_ID;
-    const key_secret = process.env.RAZORPAY_KEY_SECRET;
+    const key_id = (process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '').trim();
+    const key_secret = (process.env.RAZORPAY_KEY_SECRET || '').trim();
 
     if (!key_id || !key_secret) {
-        throw new Error('Razorpay credentials missing in environment variables');
+        throw new Error('Razorpay credentials missing in environment variables (RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET)');
     }
     return new Razorpay({ key_id, key_secret });
 }
@@ -102,7 +103,7 @@ const createPaymentOrder = async (req, res) => {
                 razorpayOrderId: rzpOrder.id,
                 amount: rzpOrder.amount,
                 currency: rzpOrder.currency,
-                keyId: process.env.RAZORPAY_KEY_ID
+                keyId: (process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '').trim()
             });
         }
 
@@ -173,7 +174,7 @@ const createPaymentOrder = async (req, res) => {
             razorpayOrderId: rzpOrder.id,
             amount: rzpOrder.amount,
             currency: rzpOrder.currency,
-            keyId: process.env.RAZORPAY_KEY_ID
+            keyId: (process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '').trim()
         });
     } catch (error) {
         console.error('Razorpay Order Creation Error:', error);
@@ -341,6 +342,7 @@ const handleWebhook = async (req, res) => {
 };
 
 module.exports = {
+    getRazorpayInstance,
     createPaymentOrder,
     verifyPayment,
     handleWebhook

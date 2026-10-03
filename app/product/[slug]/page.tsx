@@ -22,6 +22,7 @@ interface Product {
     name: string;
     description: string;
     price: number;
+    deliveryCharge?: number;
     image: string;
     images: string[];
     stock: number;
@@ -156,8 +157,8 @@ export default function ProductDetail() {
                variants.find(v => v.size === selectedSize) || null;
     }, [variants, selectedSize, selectedColor]);
 
-    // Effective price: variant override or base
-    const effectivePrice = activeVariant?.price ?? product?.price ?? 0;
+    // Effective price: product price
+    const effectivePrice = product?.price ?? activeVariant?.price ?? 0;
     const variantStock = activeVariant?.stock ?? 0;
 
     // CRITICAL FIX: Clamp quantity whenever active variant or its stock changes.
@@ -219,6 +220,7 @@ export default function ProductDetail() {
             name: product.name,
             image: activeVariant.image || product.image,
             price: effectivePrice,
+            deliveryCharge: Number(product.deliveryCharge || 0),
             qty: safeQty,
             stock: variantStock,
             size: activeVariant.size,
@@ -282,7 +284,16 @@ export default function ProductDetail() {
                         </div>
                     </div>
 
-                    <p className="text-3xl font-sans font-medium">₹{effectivePrice.toLocaleString('en-IN')}</p>
+                    <div>
+                        <p className="text-3xl font-sans font-medium">₹{effectivePrice.toLocaleString('en-IN')}</p>
+                        <p className="text-sm mt-1">
+                            {Number(product.deliveryCharge || 0) > 0 ? (
+                                <span className="text-gray-600 font-medium">Delivery: ₹{product.deliveryCharge}</span>
+                            ) : (
+                                <span className="text-emerald-700 font-semibold">Free Delivery</span>
+                            )}
+                        </p>
+                    </div>
 
                     <div className="prose prose-sm text-foreground/80 leading-relaxed">
                         <p>{product.description}</p>
@@ -442,7 +453,12 @@ export default function ProductDetail() {
                     <div className="pt-4 border-t border-gray-200 space-y-2 text-sm text-gray-500">
                         <p><span className="font-semibold text-foreground">Fabric:</span> {product.fabric || "Premium Quality"}</p>
                         <p><span className="font-semibold text-foreground">Care:</span> Dry Clean Only</p>
-                        <p><span className="font-semibold text-foreground">Shipping:</span> Free delivery on orders over ₹1,999</p>
+                        <p>
+                            <span className="font-semibold text-foreground">Shipping:</span>{" "}
+                            {Number(product.deliveryCharge || 0) > 0 
+                                ? `₹${product.deliveryCharge} delivery charge applies` 
+                                : "Free delivery across India"}
+                        </p>
                     </div>
                 </div>
             </div>

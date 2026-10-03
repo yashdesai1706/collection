@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { ShoppingBag, User, Search, Menu, X, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@/store/authStore";
@@ -11,6 +11,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 
 export default function Navbar() {
+    const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -24,6 +25,10 @@ export default function Navbar() {
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    if (pathname?.startsWith("/admin")) {
+        return null;
+    }
 
     // Alt+A quick shortcut for admin
     useEffect(() => {
@@ -71,6 +76,7 @@ export default function Navbar() {
                                     src="/logo.jpg"
                                     alt="Priti's Collection"
                                     fill
+                                    sizes="(max-width: 640px) 32px, 44px"
                                     className="object-cover"
                                     priority
                                 />

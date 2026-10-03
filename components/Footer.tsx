@@ -1,8 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Instagram, Youtube, ShieldCheck, Sparkles, Truck, MessageCircle } from "lucide-react";
 
 export default function Footer() {
+    const pathname = usePathname();
+
+    if (pathname?.startsWith("/admin")) {
+        return null;
+    }
+
     return (
         <footer className="w-full max-w-full bg-primary-dark text-cream pt-16 pb-8 border-t border-secondary/20">
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,15 +27,20 @@ export default function Footer() {
                             <p className="text-[11px] text-cream/70">Every piece inspected before packing</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-secondary/15 flex items-center justify-center text-secondary flex-shrink-0">
+                    <a
+                        href="https://wa.me/919075271108"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 group"
+                    >
+                        <div className="w-10 h-10 rounded-full bg-secondary/15 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-primary transition-colors flex-shrink-0">
                             <MessageCircle size={20} />
                         </div>
                         <div>
-                            <h4 className="text-xs font-semibold text-cream">WhatsApp Assistance</h4>
-                            <p className="text-[11px] text-cream/70">Real photos & friendly customer support</p>
+                            <h4 className="text-xs font-semibold text-cream group-hover:text-secondary transition-colors">WhatsApp Assistance</h4>
+                            <p className="text-[11px] text-cream/70">Chat at 9075271108</p>
                         </div>
-                    </div>
+                    </a>
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-secondary/15 flex items-center justify-center text-secondary flex-shrink-0">
                             <Truck size={20} />
@@ -57,6 +71,7 @@ export default function Footer() {
                                     src="/logo.jpg"
                                     alt="Priti's Collection"
                                     fill
+                                    sizes="40px"
                                     className="object-cover"
                                 />
                             </div>

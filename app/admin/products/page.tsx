@@ -11,6 +11,7 @@ interface Product {
     _id: string;
     name: string;
     price: number;
+    deliveryCharge?: number;
     category: string | { _id: string; name: string; slug: string };
     stock: number;
     image: string;
@@ -37,14 +38,14 @@ export default function ProductList() {
     useEffect(() => { loadProducts(); }, []);
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm("Archive this product? It will be hidden from the shop.")) return;
+        if (!window.confirm("Permanently delete this product? This will completely remove all Cloudinary images and product data.")) return;
         try {
             if (user?.token) {
                 await deleteProduct(id, user.token);
                 setProducts(prev => prev.filter(p => p._id !== id));
             }
-        } catch {
-            alert("Failed to archive product");
+        } catch (err: any) {
+            alert(err?.response?.data?.message || "Failed to delete product");
         }
     };
 
@@ -72,6 +73,7 @@ export default function ProductList() {
                                 <th className="px-6 py-4">Image</th>
                                 <th className="px-6 py-4">Name</th>
                                 <th className="px-6 py-4">Price</th>
+                                <th className="px-6 py-4">Delivery</th>
                                 <th className="px-6 py-4">Category</th>
                                 <th className="px-6 py-4">Stock</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
@@ -93,6 +95,13 @@ export default function ProductList() {
                                     </td>
                                     <td className="px-6 py-4 font-medium text-gray-900">{product.name}</td>
                                     <td className="px-6 py-4">₹{product.price.toLocaleString('en-IN')}</td>
+                                    <td className="px-6 py-4">
+                                        {Number(product.deliveryCharge || 0) > 0 ? (
+                                            <span className="text-gray-800 font-medium">₹{product.deliveryCharge}</span>
+                                        ) : (
+                                            <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs font-semibold">Free</span>
+                                        )}
+                                    </td>
                                     <td className="px-6 py-4">{typeof product.category === 'object' && product.category !== null ? product.category.name : product.category}</td>
                                     <td className="px-6 py-4">{product.stock ?? 0}</td>
                                     <td className="px-6 py-4 text-right">
@@ -107,7 +116,7 @@ export default function ProductList() {
                                             <button
                                                 onClick={() => handleDelete(product._id)}
                                                 className="p-2 text-red-600 hover:bg-red-50 rounded"
-                                                title="Archive product"
+                                                title="Delete product"
                                             >
                                                 <Trash2 size={18} />
                                             </button>

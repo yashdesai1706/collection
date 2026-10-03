@@ -9,7 +9,7 @@ interface Category { _id: string; name: string; }
 interface Subcategory { _id: string; name: string; category: { _id: string }; }
 interface Size { _id: string; name: string; }
 interface Color { _id: string; name: string; hex: string; }
-interface Variant { size: string; color: string | null; stock: number; price: string; }
+interface Variant { size: string; color: string | null; stock: number; }
 
 interface ProductFormProps {
     initialData?: any;
@@ -28,6 +28,10 @@ export default function ProductForm({
 }: ProductFormProps) {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState(initialData?.image || "");
+    const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+    const [galleryPreviews, setGalleryPreviews] = useState<string[]>(
+        initialData?.images?.map((img: any) => typeof img === "string" ? img : img.url) || []
+    );
 
     const [categories, setCategories] = useState<Category[]>([]);
     const [filteredSubs, setFilteredSubs] = useState<Subcategory[]>([]);
@@ -37,8 +41,9 @@ export default function ProductForm({
     const [formData, setFormData] = useState({
         name: initialData?.name || "",
         price: initialData?.price ? String(initialData.price) : "",
-        category: typeof initialData?.category === 'object' ? initialData?.category?._id : (initialData?.category || ""),
-        subcategory: typeof initialData?.subcategory === 'object' ? initialData?.subcategory?._id : (initialData?.subcategory || ""),
+        deliveryCharge: initialData?.deliveryCharge !== undefined ? String(initialData.deliveryCharge) : "0",
+        category: typeof initialData?.category === "object" ? initialData?.category?._id : (initialData?.category || ""),
+        subcategory: typeof initialData?.subcategory === "object" ? initialData?.subcategory?._id : (initialData?.subcategory || ""),
         fabric: initialData?.fabric || "",
         description: initialData?.description || "",
         slug: initialData?.slug || "",
@@ -50,7 +55,6 @@ export default function ProductForm({
                 size: v.size,
                 color: v.color || null,
                 stock: v.stock || 0,
-                price: v.price ? String(v.price) : "",
             }))
             : []
     );
@@ -78,7 +82,7 @@ export default function ProductForm({
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.value;
-        const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+        const slug = name.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "");
         setFormData(prev => ({
             ...prev,
             name,
@@ -98,13 +102,27 @@ export default function ProductForm({
         }
     };
 
+    const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const files = Array.from(e.target.files);
+            setGalleryFiles(prev => [...prev, ...files]);
+            const urls = files.map(f => URL.createObjectURL(f));
+            setGalleryPreviews(prev => [...prev, ...urls]);
+        }
+    };
+
+    const removeGalleryImage = (index: number) => {
+        setGalleryFiles(prev => prev.filter((_, i) => i !== index));
+        setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+    };
+
     const toggleSize = (sizeName: string) => {
         setVariants(prev => {
             const hasSize = prev.some(v => v.size === sizeName);
             if (hasSize) {
                 return prev.filter(v => v.size !== sizeName);
             } else {
-                return [...prev, { size: sizeName, color: null, stock: 5, price: "" }];
+                return [...prev, { size: sizeName, color: null, stock: 5 }];
             }
         });
     };
@@ -119,11 +137,11 @@ export default function ProductForm({
                 next = next.filter(v => !(v.size === sizeName && v.color === colorName));
                 const remainingColors = next.filter(v => v.size === sizeName);
                 if (remainingColors.length === 0) {
-                    next.push({ size: sizeName, color: null, stock: 5, price: "" });
+                    next.push({ size: sizeName, color: null, stock: 5 });
                 }
             } else {
                 next = next.filter(v => !(v.size === sizeName && v.color === null));
-                next.push({ size: sizeName, color: colorName, stock: 5, price: "" });
+                next.push({ size: sizeName, color: colorName, stock: 5 });
             }
             return next;
         });
@@ -133,15 +151,12 @@ export default function ProductForm({
         setVariants(prev => prev.map((v, i) => i === index ? { ...v, stock: Math.max(0, stock) } : v));
     };
 
-    const updateVariantPrice = (index: number, price: string) => {
-        setVariants(prev => prev.map((v, i) => i === index ? { ...v, price } : v));
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const data = new FormData();
         data.append("name", formData.name.trim());
         data.append("price", formData.price);
+        data.append("deliveryCharge", formData.deliveryCharge || "0");
         data.append("category", formData.category);
         data.append("description", formData.description);
         data.append("slug", formData.slug.trim());
@@ -149,11 +164,14 @@ export default function ProductForm({
         if (formData.fabric) data.append("fabric", formData.fabric.trim());
         if (imageFile) data.append("image", imageFile);
 
+        galleryFiles.forEach((file) => {
+            data.append("images", file);
+        });
+
         const cleanVariants = variants.map(v => ({
             size: v.size,
             color: v.color || null,
             stock: Number(v.stock) || 0,
-            price: v.price ? Number(v.price) : null,
         }));
         data.append("variants", JSON.stringify(cleanVariants));
 
@@ -177,8 +195,8 @@ export default function ProductForm({
                     1. Product Information
                 </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="sm:col-span-1">
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Product Title *</label>
                         <input
                             type="text"
@@ -191,7 +209,7 @@ export default function ProductForm({
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Base Price (₹) *</label>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Price (₹) *</label>
                         <input
                             type="number"
                             required
@@ -202,6 +220,21 @@ export default function ProductForm({
                             name="price"
                             className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
                         />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Delivery Charges (₹) *</label>
+                        <input
+                            type="number"
+                            required
+                            min="0"
+                            placeholder="0 for Free Delivery, or e.g. 80"
+                            value={formData.deliveryCharge}
+                            onChange={handleChange}
+                            name="deliveryCharge"
+                            className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                        />
+                        <span className="text-[10px] text-gray-500 mt-1 block">Enter 0 for Free Delivery</span>
                     </div>
                 </div>
 
@@ -271,39 +304,80 @@ export default function ProductForm({
                     2. Product Imagery
                 </h3>
 
-                <div className="flex flex-col sm:flex-row items-start gap-6">
-                    <label className="relative border-2 border-dashed border-gray-200 hover:border-primary rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors w-full sm:w-64 h-48 bg-gray-50/50">
-                        <Upload size={28} className="text-gray-400 mb-2" />
-                        <span className="text-xs font-medium text-gray-700">Click to upload image</span>
-                        <span className="text-[10px] text-gray-400 mt-1">PNG, JPG, WEBP up to 8MB</span>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                        />
-                    </label>
+                <div className="space-y-4">
+                    <div>
+                        <span className="block text-xs font-semibold text-gray-700 mb-2">Primary / Cover Image *</span>
+                        <div className="flex flex-col sm:flex-row items-start gap-4">
+                            <label className="relative border-2 border-dashed border-gray-200 hover:border-primary rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors w-full sm:w-56 h-40 bg-gray-50/50">
+                                <Upload size={24} className="text-gray-400 mb-1" />
+                                <span className="text-xs font-medium text-gray-700">Choose cover image</span>
+                                <span className="text-[10px] text-gray-400 mt-0.5">PNG, JPG, WEBP up to 8MB</span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="hidden"
+                                />
+                            </label>
 
-                    {previewUrl && (
-                        <div className="relative w-36 h-48 rounded-xl overflow-hidden border border-gray-200 bg-cream">
-                            <Image
-                                src={previewUrl}
-                                alt="Preview"
-                                fill
-                                className="object-cover"
-                                unoptimized={previewUrl.startsWith('blob:') || previewUrl.startsWith('http')}
-                            />
-                            {imageFile && (
-                                <button
-                                    type="button"
-                                    onClick={() => { setImageFile(null); setPreviewUrl(initialData?.image || ""); }}
-                                    className="absolute top-2 right-2 p-1 rounded-full bg-red-600 text-white shadow-xs"
-                                >
-                                    <X size={14} />
-                                </button>
+                            {previewUrl && (
+                                <div className="relative w-32 h-40 rounded-xl overflow-hidden border border-gray-200 bg-cream">
+                                    <Image
+                                        src={previewUrl}
+                                        alt="Preview"
+                                        fill
+                                        className="object-cover"
+                                        unoptimized={previewUrl.startsWith('blob:') || previewUrl.startsWith('http')}
+                                    />
+                                    {imageFile && (
+                                        <button
+                                            type="button"
+                                            onClick={() => { setImageFile(null); setPreviewUrl(initialData?.image || ""); }}
+                                            className="absolute top-2 right-2 p-1 rounded-full bg-red-600 text-white shadow-xs"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    )}
+                                </div>
                             )}
                         </div>
-                    )}
+                    </div>
+
+                    <div>
+                        <span className="block text-xs font-semibold text-gray-700 mb-2">Additional Gallery Images</span>
+                        <div className="flex flex-wrap items-start gap-3">
+                            <label className="border-2 border-dashed border-gray-200 hover:border-primary rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors w-32 h-32 bg-gray-50/50 text-center">
+                                <Upload size={20} className="text-gray-400 mb-1" />
+                                <span className="text-[11px] font-medium text-gray-700">Add More</span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleGalleryChange}
+                                    className="hidden"
+                                />
+                            </label>
+
+                            {galleryPreviews.map((url, idx) => (
+                                <div key={idx} className="relative w-28 h-32 rounded-xl overflow-hidden border border-gray-200 bg-cream group">
+                                    <Image
+                                        src={url}
+                                        alt={`Gallery ${idx + 1}`}
+                                        fill
+                                        className="object-cover"
+                                        unoptimized={url.startsWith('blob:') || url.startsWith('http')}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeGalleryImage(idx)}
+                                        className="absolute top-1.5 right-1.5 p-1 rounded-full bg-red-600 text-white shadow-xs opacity-90 hover:opacity-100"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -380,7 +454,6 @@ export default function ProductForm({
                                     <th className="p-3">Size</th>
                                     <th className="p-3">Color</th>
                                     <th className="p-3">Stock Units</th>
-                                    <th className="p-3">Price Override (₹ optional)</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -395,16 +468,6 @@ export default function ProductForm({
                                                 value={v.stock}
                                                 onChange={(e) => updateVariantStock(idx, Number(e.target.value))}
                                                 className="w-24 px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-primary"
-                                            />
-                                        </td>
-                                        <td className="p-3">
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                placeholder={`Base (₹${formData.price || 0})`}
-                                                value={v.price}
-                                                onChange={(e) => updateVariantPrice(idx, e.target.value)}
-                                                className="w-32 px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-primary"
                                             />
                                         </td>
                                     </tr>

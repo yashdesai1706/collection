@@ -5,7 +5,7 @@ import Link from "next/link";
 import Hero from "@/components/Hero";
 import ProductCard from "@/components/ProductCard";
 import { fetchProducts } from "@/lib/api";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MessageCircle } from "lucide-react";
 
 export default function Home() {
     const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
@@ -95,7 +95,46 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* 3. Featured Products Grid */}
+            {/* 3. Direct WhatsApp Assistance Banner */}
+            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+                <div className="bg-gradient-to-r from-emerald-50 via-white to-emerald-50/70 rounded-2xl p-6 sm:p-8 border border-emerald-200/80 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4 text-center md:text-left">
+                        <div className="w-13 h-13 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-md flex-shrink-0">
+                            <MessageCircle size={28} />
+                        </div>
+                        <div>
+                            <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-800">
+                                Personal Boutique Assistance & Orders
+                            </span>
+                            <h3 className="font-serif text-xl sm:text-2xl font-bold text-gray-900 mt-0.5">
+                                Chat with us on WhatsApp
+                            </h3>
+                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                                Need help with fabric, sizing, or video call showcase? Message us anytime at{" "}
+                                <a
+                                    href="https://wa.me/919075271108"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-bold text-emerald-700 hover:underline"
+                                >
+                                    9075271108
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        href="https://wa.me/919075271108"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-7 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2.5 flex-shrink-0 active:scale-95"
+                    >
+                        <MessageCircle size={18} />
+                        <span>WhatsApp: 9075271108</span>
+                    </a>
+                </div>
+            </section>
+
+            {/* 4. Featured Products Grid */}
             <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20 border-t border-[#E8E1F0]">
                 <div className="flex flex-col sm:flex-row justify-between items-baseline mb-10 gap-3">
                     <div>

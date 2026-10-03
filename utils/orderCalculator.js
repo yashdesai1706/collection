@@ -3,6 +3,7 @@ const Product = require('../models/Product');
 /**
  * Computes exact order totals and validates inventory entirely from the database.
  * Client-submitted prices and totals are strictly ignored.
+ * Delivery charges are computed directly from each product's configured deliveryCharge.
  *
  * @param {Array} rawItems - Array of { product, variantId, qty } from client
  * @returns {Promise<{ formattedOrderItems: Array, itemsPrice: number, shippingPrice: number, taxPrice: number, totalPrice: number, amountInPaise: number }>}
@@ -38,7 +39,6 @@ async function calculateOrderSummary(rawItems) {
             throw error;
         }
 
-        let effectivePrice;
         let variantId = null;
         let size = 'Free Size';
         let color = null;
@@ -62,11 +62,6 @@ async function calculateOrderSummary(rawItems) {
                 throw error;
             }
 
-            // Per-variant price override when set and > 0, otherwise base product price
-            effectivePrice = (variant.price !== null && variant.price !== undefined && Number(variant.price) > 0)
-                ? Number(variant.price)
-                : Number(product.price);
-
             variantId = variant._id;
             size = variant.size;
             color = variant.color || null;
@@ -79,9 +74,6 @@ async function calculateOrderSummary(rawItems) {
                 error.statusCode = 400;
                 throw error;
             }
-            effectivePrice = (firstVariant.price !== null && firstVariant.price !== undefined && Number(firstVariant.price) > 0)
-                ? Number(firstVariant.price)
-                : Number(product.price);
             variantId = firstVariant._id;
             size = firstVariant.size;
             color = firstVariant.color || null;
@@ -93,8 +85,11 @@ async function calculateOrderSummary(rawItems) {
                 error.statusCode = 400;
                 throw error;
             }
-            effectivePrice = Number(product.price);
         }
+
+        // Single clean product price (Price Override removed)
+        const effectivePrice = Number(product.price);
+        const itemDeliveryCharge = Number(product.deliveryCharge || 0);
 
         formattedOrderItems.push({
             product: product._id,
@@ -102,17 +97,17 @@ async function calculateOrderSummary(rawItems) {
             name: product.name,
             image: itemImage,
             price: effectivePrice,
+            deliveryCharge: itemDeliveryCharge,
             qty,
             size,
             color
         });
     }
 
-const { SHIPPING_CONFIG } = require('../config/shippingConfig');
-
     // Recompute monetary totals from scratch on the server
     const itemsPrice = formattedOrderItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
-    const shippingPrice = itemsPrice >= SHIPPING_CONFIG.FREE_SHIPPING_MIN ? 0 : SHIPPING_CONFIG.STANDARD_FEE;
+    // Shipping price is the sum of product delivery charges for all items in the order
+    const shippingPrice = formattedOrderItems.reduce((acc, item) => acc + (item.deliveryCharge * item.qty), 0);
     const taxPrice = 0;
     const totalPrice = itemsPrice + shippingPrice + taxPrice;
     const amountInPaise = Math.round(totalPrice * 100);

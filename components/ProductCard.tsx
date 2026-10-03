@@ -13,6 +13,7 @@ interface ProductProps {
         _id?: string;
         name: string;
         price: number;
+        deliveryCharge?: number;
         category: any;
         image: string;
         slug: string;
@@ -22,7 +23,6 @@ interface ProductProps {
             size: string;
             color: string | null;
             stock: number;
-            price: number | null;
             image?: string | null;
         }>;
     };
@@ -76,7 +76,8 @@ export default function ProductCard({ product }: ProductProps) {
             variantId: firstVariant?._id || product._id || String(product.id),
             name: product.name,
             image: firstVariant?.image || product.image,
-            price: firstVariant?.price ?? product.price,
+            price: product.price,
+            deliveryCharge: Number(product.deliveryCharge || 0),
             qty: 1,
             stock: stock,
             size: firstVariant?.size || "Free Size",
@@ -177,10 +178,19 @@ export default function ProductCard({ product }: ProductProps) {
                     </Link>
                 </div>
 
-                <div className="flex items-center justify-between pt-1">
-                    <p className="font-serif text-base font-bold text-primary">
-                        ₹{product.price.toLocaleString('en-IN')}
-                    </p>
+                <div className="flex items-end justify-between pt-1">
+                    <div>
+                        <p className="font-serif text-base font-bold text-primary">
+                            ₹{product.price.toLocaleString('en-IN')}
+                        </p>
+                        <p className="text-[11px] font-sans">
+                            {Number(product.deliveryCharge || 0) > 0 ? (
+                                <span className="text-gray-500">+ ₹{product.deliveryCharge} delivery</span>
+                            ) : (
+                                <span className="text-emerald-700 font-medium">Free Delivery</span>
+                            )}
+                        </p>
+                    </div>
 
                     {/* Mobile Quick Add Button */}
                     {!isOutOfStock && (

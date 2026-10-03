@@ -4,8 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCartStore } from '@/store/cartStore';
-import { SHIPPING_CONFIG } from '@/config/shippingConfig';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function CartPage() {
@@ -40,9 +39,6 @@ export default function CartPage() {
         );
     }
 
-    const freeShippingRemaining = Math.max(0, SHIPPING_CONFIG.FREE_SHIPPING_MIN - itemsPrice);
-    const freeShippingProgress = Math.min(100, Math.round((itemsPrice / SHIPPING_CONFIG.FREE_SHIPPING_MIN) * 100));
-
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex flex-col sm:flex-row justify-between items-baseline mb-8 pb-4 border-b border-[#E8E1F0] gap-2">
@@ -50,27 +46,6 @@ export default function CartPage() {
                 <span className="text-xs text-foreground/60 font-medium">
                     {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
                 </span>
-            </div>
-
-            {/* Free Shipping Incentive Bar */}
-            <div className="bg-white p-4 rounded-xl border border-[#E8E1F0] mb-8 shadow-2xs">
-                <div className="flex items-center justify-between text-xs font-medium mb-2">
-                    <span className="flex items-center gap-1.5 text-primary">
-                        <Sparkles size={14} className="text-secondary" />
-                        {freeShippingRemaining > 0 ? (
-                            <>Add <strong className="text-foreground">₹{freeShippingRemaining.toLocaleString('en-IN')}</strong> more to unlock <strong>Free Nationwide Delivery</strong>!</>
-                        ) : (
-                            <strong className="text-emerald-700">Congratulations! You unlocked Free Nationwide Delivery.</strong>
-                        )}
-                    </span>
-                    <span className="text-foreground/50">{freeShippingProgress}%</span>
-                </div>
-                <div className="w-full bg-cream rounded-full h-2 overflow-hidden border border-gray-100">
-                    <div
-                        className="bg-secondary h-full rounded-full transition-all duration-500"
-                        style={{ width: `${freeShippingProgress}%` }}
-                    />
-                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -90,6 +65,7 @@ export default function CartPage() {
                                     src={item.image || "/logo.jpg"}
                                     alt={item.name}
                                     fill
+                                    sizes="(max-width: 640px) 100vw, 112px"
                                     className="object-cover"
                                     unoptimized
                                 />
@@ -121,6 +97,9 @@ export default function CartPage() {
                                                 Color: {item.color}
                                             </span>
                                         )}
+                                        <span className={`px-2 py-0.5 rounded border ${Number(item.deliveryCharge || 0) > 0 ? 'bg-gray-50 border-gray-200 text-gray-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700 font-medium'}`}>
+                                            Delivery: {Number(item.deliveryCharge || 0) > 0 ? `₹${item.deliveryCharge} / unit` : 'Free'}
+                                        </span>
                                     </div>
                                 </div>
 

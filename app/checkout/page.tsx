@@ -83,7 +83,7 @@ export default function CheckoutPage() {
 
             // 2. Configure Razorpay Standard Checkout modal
             const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || paymentOrder.keyId,
+                key: paymentOrder.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
                 amount: paymentOrder.amount, // in paise, computed by server
                 currency: paymentOrder.currency || "INR",
                 name: "Priti's Collection",
@@ -330,28 +330,39 @@ export default function CheckoutPage() {
                     <h2 className="text-xl font-medium mb-4">Order Summary</h2>
 
                     {cartItems.map((item) => (
-                        <div key={item._id} className="flex justify-between text-sm mb-2">
+                        <div key={item.variantId || item._id} className="flex justify-between text-sm mb-2">
                             <span>
                                 {item.name} × {item.qty}
+                                {Number(item.deliveryCharge || 0) > 0 && (
+                                    <span className="block text-[11px] text-gray-500">
+                                        Delivery: ₹{item.deliveryCharge} × {item.qty}
+                                    </span>
+                                )}
                             </span>
-                            <span>
+                            <span className="font-medium text-gray-900">
                                 ₹{(item.price * item.qty).toLocaleString("en-IN")}
                             </span>
                         </div>
                     ))}
 
                     <div className="border-t pt-4 flex justify-between">
-                        <span>Subtotal</span>
+                        <span>Items Subtotal</span>
                         <span>₹{itemsPrice.toLocaleString("en-IN")}</span>
                     </div>
 
                     <div className="flex justify-between">
-                        <span>Shipping</span>
-                        <span>{shippingPrice === 0 ? "Free" : `₹${shippingPrice}`}</span>
+                        <span>Delivery Charges</span>
+                        <span className="font-medium">
+                            {shippingPrice === 0 ? (
+                                <span className="text-emerald-700 font-semibold">Free Delivery</span>
+                            ) : (
+                                `₹${shippingPrice}`
+                            )}
+                        </span>
                     </div>
 
                     <div className="border-t pt-4 flex justify-between font-bold text-primary">
-                        <span>Total</span>
+                        <span>Total Payable</span>
                         <span>₹{totalPrice.toLocaleString("en-IN")}</span>
                     </div>
                 </div>

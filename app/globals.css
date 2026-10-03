@@ -73,3 +73,15 @@
     letter-spacing: -0.01em;
   }
 }
+
+/* Hide Next.js floating dev overlay indicator */
+#next-logo,
+nextjs-portal,
+[data-nextjs-dev-overlay],
+[data-nextjs-toast],
+next-route-announcer {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

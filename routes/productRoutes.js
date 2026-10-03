@@ -9,14 +9,17 @@ const {
     updateProduct
 } = require('../controllers/productController');
 const { protect, admin } = require('../middleware/authMiddleware');
-
 const upload = require('../middleware/uploadMiddleware');
 
-router.route('/').get(getProducts).post(protect, admin, upload.single('image'), createProduct);
+router.route('/')
+    .get(getProducts)
+    .post(protect, admin, upload.any(), createProduct);
+
 router.route('/:id')
     .get(getProductById)
     .delete(protect, admin, deleteProduct)
-    .put(protect, admin, upload.single('image'), updateProduct);
+    .put(protect, admin, upload.any(), updateProduct);
+
 router.route('/slug/:slug').get(getProductBySlug);
 
 module.exports = router;

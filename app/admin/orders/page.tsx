@@ -258,6 +258,7 @@ export default function OrderList() {
                                                         src={item.image || "/logo.jpg"}
                                                         alt={item.name}
                                                         fill
+                                                        sizes="56px"
                                                         className="object-cover"
                                                         unoptimized
                                                     />

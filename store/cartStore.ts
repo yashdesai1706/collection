@@ -6,7 +6,8 @@ interface CartItem {
     variantId: string;  // variant subdocument _id — unique key for cart dedup
     name: string;
     image: string;
-    price: number;      // effective price (variant override or base)
+    price: number;      // product price
+    deliveryCharge?: number; // per-product delivery charge (₹)
     qty: number;
     stock: number;      // variant-level stock
     color?: string;
@@ -26,13 +27,9 @@ interface CartState {
     totalPrice: number;
 }
 
-import { SHIPPING_CONFIG } from '@/config/shippingConfig';
-
 const recalc = (items: CartItem[]) => {
     const itemsPrice = items.reduce((acc, item) => acc + item.price * item.qty, 0);
-    const shippingPrice = (itemsPrice >= SHIPPING_CONFIG.FREE_SHIPPING_MIN || itemsPrice === 0) 
-        ? 0 
-        : SHIPPING_CONFIG.STANDARD_FEE;
+    const shippingPrice = items.reduce((acc, item) => acc + (Number(item.deliveryCharge || 0) * item.qty), 0);
     const totalPrice = itemsPrice + shippingPrice;
     return { itemsPrice, shippingPrice, totalPrice };
 };
@@ -95,22 +92,19 @@ export const useCartStore = create<CartState>()(
             storage: createJSONStorage(() => localStorage),
             onRehydrateStorage: () => (state) => {
                 if (state && Array.isArray(state.cartItems)) {
-                    let changed = false;
                     const cleanItems = state.cartItems.map((item) => {
                         const maxStock = item.stock > 0 ? item.stock : 1;
-                        if (item.qty > maxStock) {
-                            changed = true;
-                            return { ...item, qty: maxStock };
-                        }
-                        return item;
+                        return {
+                            ...item,
+                            deliveryCharge: Number(item.deliveryCharge || 0),
+                            qty: item.qty > maxStock ? maxStock : item.qty
+                        };
                     });
-                    if (changed) {
-                        state.cartItems = cleanItems;
-                        const { itemsPrice, shippingPrice, totalPrice } = recalc(cleanItems);
-                        state.itemsPrice = itemsPrice;
-                        state.shippingPrice = shippingPrice;
-                        state.totalPrice = totalPrice;
-                    }
+                    state.cartItems = cleanItems;
+                    const { itemsPrice, shippingPrice, totalPrice } = recalc(cleanItems);
+                    state.itemsPrice = itemsPrice;
+                    state.shippingPrice = shippingPrice;
+                    state.totalPrice = totalPrice;
                 }
             }
         }

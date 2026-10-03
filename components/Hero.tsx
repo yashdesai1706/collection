@@ -109,14 +109,14 @@ export default function Hero() {
 
                             {/* WhatsApp Direct Help for Local Customers */}
                             <a
-                                href="https://wa.me/917387937278?text=Hello%20Priti's%20Collection!%20I'm%20looking%20for%20festive%20sarees%20and%20dresses."
+                                href="https://wa.me/919075271108"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-full sm:w-auto px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 group text-center"
-                                title="Chat directly with us on WhatsApp"
+                                title="Chat with us on WhatsApp: 9075271108"
                             >
-                                <MessageCircle size={15} />
-                                <span>WhatsApp Order & Help</span>
+                                <MessageCircle size={16} />
+                                <span>WhatsApp: 9075271108</span>
                             </a>
                         </div>
 
