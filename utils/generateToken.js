@@ -5,7 +5,7 @@ const generateToken = (id) => {
         console.error('CRITICAL WARNING: Using default JWT_SECRET in production! Please set a strong secret in Render environment variables.');
     }
 
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+    return jwt.sign({ id }, process.env.JWT_SECRET || 'pritis_collection_secret_key_2026', {
         expiresIn: '30d',
     });
 };

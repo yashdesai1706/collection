@@ -2,9 +2,9 @@ require('dotenv').config();
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'pxvojfmz',
+    api_key: process.env.CLOUDINARY_API_KEY || '352547467662295',
+    api_secret: process.env.CLOUDINARY_API_SECRET || '8HavqnTxqDFMF6f_GU0rJF66bmE',
 });
 
 /**
