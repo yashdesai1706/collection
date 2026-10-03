@@ -147,6 +147,12 @@ export const markOrderDelivered = async (orderId: string, token: string) => {
     return response.data;
 };
 
+export const updateOrderStatus = async (orderId: string, status: string, token: string) => {
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    const response = await api.put(`/admin/orders/${orderId}/status`, { status }, config);
+    return response.data;
+};
+
 // ── Categories & Subcategories ──────────────────────────────
 export const getCategories = async (all = false) => {
     const response = await api.get(`/categories${all ? '?all=true' : ''}`);

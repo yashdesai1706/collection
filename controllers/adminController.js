@@ -58,21 +58,69 @@ const updateUserRole = async (req, res) => {
     }
 };
 
-// @desc    Mark order as delivered
-// @route   PUT /api/admin/orders/:id/deliver
+const { sendOrderEmail, getWhatsAppUrlForCustomer, formatWhatsAppMessage } = require('../utils/notificationService');
+
+// @desc    Update order status with notifications
+// @route   PUT /api/admin/orders/:id/status
 // @access  Private/Admin
-const markOrderDelivered = async (req, res) => {
+const updateOrderStatus = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id);
+        const { status } = req.body;
+        if (!status) {
+            return res.status(400).json({ message: 'Status is required' });
+        }
+
+        const validStatuses = ['Processing', 'Ready for Delivery', 'Delivered'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+        }
+
+        const order = await Order.findById(req.params.id).populate('user', 'name email');
         if (!order) return res.status(404).json({ message: 'Order not found' });
 
-        order.isDelivered = true;
-        order.deliveredAt = Date.now();
+        order.status = status;
+        if (status === 'Delivered') {
+            order.isDelivered = true;
+            order.deliveredAt = Date.now();
+        } else {
+            order.isDelivered = false;
+            order.deliveredAt = undefined;
+        }
+
         const updated = await order.save();
-        res.json(updated);
+
+        // Send email update to customer asynchronously
+        sendOrderEmail({ order: updated, statusOverride: status }).catch(err => {
+            console.error('[NotificationService] Status email error:', err.message);
+        });
+
+        const whatsappUrl = getWhatsAppUrlForCustomer(updated, status);
+        const whatsappMessage = formatWhatsAppMessage(updated, status);
+
+        res.json({
+            ...updated.toObject(),
+            whatsappUrl,
+            whatsappMessage
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Update order status error:', error);
+        res.status(500).json({ message: 'Server Error', error: error.message });
     }
 };
 
-module.exports = { getDashboardStats, getUsers, updateUserRole, markOrderDelivered };
+// @desc    Mark order as delivered (Legacy alias)
+// @route   PUT /api/admin/orders/:id/deliver
+// @access  Private/Admin
+const markOrderDelivered = async (req, res) => {
+    req.body = { status: 'Delivered' };
+    return updateOrderStatus(req, res);
+};
+
+module.exports = {
+    getDashboardStats,
+    getUsers,
+    updateUserRole,
+    markOrderDelivered,
+    updateOrderStatus
+};
+

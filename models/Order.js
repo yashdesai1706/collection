@@ -16,8 +16,8 @@ const orderSchema = new mongoose.Schema({
         address: { type: String, required: true },
         city: { type: String, required: true },
         postalCode: { type: String, required: true },
-        country: { type: String, required: true }
-        // TODO: requires product/client decision: Mandatory phone field - whether existing accounts without one get prompted on next login
+        country: { type: String, required: true },
+        phone: { type: String, default: '' }
     },
     // MVP: COD disabled, see TODO: Support Cash on Delivery when courier COD reconciliation is live
     paymentMethod: { type: String, required: true, default: 'Razorpay' },

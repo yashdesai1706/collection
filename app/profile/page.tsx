@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { fetchMyOrders } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { Package, User, Calendar, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Package, User, Calendar, CheckCircle, Clock, Truck, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProfilePage() {
@@ -92,28 +92,96 @@ export default function ProfilePage() {
                                             </div>
                                             <div className="flex flex-col items-end gap-1">
                                                 {order.isPaid ? (
-                                                    <span className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                                    <span className="flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
                                                         <CheckCircle size={12} /> Paid
                                                     </span>
                                                 ) : (
-                                                    <span className="flex items-center gap-1 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
-                                                        <Clock size={12} /> Pending
+                                                    <span className="flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                                                        <Clock size={12} /> Payment Pending
                                                     </span>
                                                 )}
-                                                {/* Delivery Status Mock */}
-                                                <span className="flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                                                    Processing
+                                                <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                                                    order.isDelivered || order.status === 'Delivered'
+                                                        ? 'bg-emerald-100 text-emerald-800'
+                                                        : order.status === 'Ready for Delivery'
+                                                            ? 'bg-amber-100 text-amber-900'
+                                                            : 'bg-blue-50 text-blue-800'
+                                                }`}>
+                                                    {order.isDelivered || order.status === 'Delivered'
+                                                        ? 'Delivered'
+                                                        : order.status === 'Ready for Delivery'
+                                                            ? 'Ready for Delivery'
+                                                            : 'Being processed soon'}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* 3-Stage Tracking Timeline */}
+                                    {(() => {
+                                        const currentStatus = order.isDelivered || order.status === 'Delivered'
+                                            ? 'Delivered'
+                                            : order.status === 'Ready for Delivery'
+                                                ? 'Ready for Delivery'
+                                                : 'Processing';
+                                        const stageNum = currentStatus === 'Delivered' ? 3 : currentStatus === 'Ready for Delivery' ? 2 : 1;
+                                        const stages = [
+                                            { title: "Being processed soon", sub: "Order confirmed & preparing" },
+                                            { title: "Ready for delivery", sub: "Packed & dispatched" },
+                                            { title: "Order delivered", sub: "Delivered to your doorstep" }
+                                        ];
+
+                                        return (
+                                            <div className="px-6 pt-5 pb-3 bg-cream/30 border-b border-gray-100">
+                                                <div className="grid grid-cols-3 gap-2 relative">
+                                                    {stages.map((st, i) => {
+                                                        const isCompleted = i + 1 <= stageNum;
+                                                        const isCurrent = i + 1 === stageNum;
+                                                        return (
+                                                            <div key={i} className="text-center relative z-10">
+                                                                <div className={`w-7 h-7 mx-auto rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                                                                    isCompleted
+                                                                        ? 'bg-primary text-cream shadow-xs'
+                                                                        : 'bg-gray-200 text-gray-400'
+                                                                } ${isCurrent ? 'ring-2 ring-secondary ring-offset-2' : ''}`}>
+                                                                    {isCompleted ? '✓' : i + 1}
+                                                                </div>
+                                                                <p className={`mt-2 text-xs font-semibold leading-tight ${
+                                                                    isCompleted ? 'text-primary' : 'text-gray-400'
+                                                                }`}>
+                                                                    {st.title}
+                                                                </p>
+                                                                <p className="text-[10px] text-gray-500 mt-0.5 hidden sm:block">
+                                                                    {st.sub}
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                <div className="mt-4 pt-3 border-t border-gray-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                                                    <div className="flex items-center gap-1.5 text-gray-600">
+                                                        <Truck size={14} className="text-secondary" />
+                                                        <span>Delivery timeline: <strong>Within 2-3 working days across India</strong></span>
+                                                    </div>
+                                                    <a
+                                                        href={`https://wa.me/919075271108?text=${encodeURIComponent(`Namaste Priti's Collection! Inquiring about order #${order._id.substring(order._id.length - 8).toUpperCase()}. Current status: ${currentStatus}. Please share my delivery updates.`)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#25D366]/15 text-[#128C7E] font-medium hover:bg-[#25D366]/25 transition-colors"
+                                                    >
+                                                        <span>💬 Track on WhatsApp</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
 
                                     <div className="p-6">
                                         <div className="space-y-4">
                                             {order.orderItems.map((item: any) => (
                                                 <div key={item._id} className="flex items-center gap-4">
                                                     <div className="w-16 h-20 bg-gray-100 rounded-md relative overflow-hidden flex-shrink-0">
-                                                        {/* Assuming image is a full URL, otherwise use a placeholder */}
                                                         {item.image ? (
                                                             <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                                         ) : (

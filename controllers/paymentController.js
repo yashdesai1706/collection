@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const { calculateOrderSummary } = require('../utils/orderCalculator');
+const { sendOrderEmail } = require('../utils/notificationService');
 
 const FALLBACK_KEY_ID = 'rzp_test_TgEvMyIg4zYGxS';
 const FALLBACK_KEY_SECRET = 'VG01I4x4F88dBJlNG7edu0pa';
@@ -55,7 +56,18 @@ async function fulfillOrder(order, paymentId, razorpayOrderId, emailAddress) {
         razorpay_order_id: razorpayOrderId
     };
 
-    return await order.save();
+    const savedOrder = await order.save();
+    try {
+        if (!savedOrder.user?.email) {
+            await savedOrder.populate('user', 'name email');
+        }
+        sendOrderEmail({ order: savedOrder, statusOverride: 'Processing' }).catch(err => {
+            console.error('[NotificationService] Email error:', err.message);
+        });
+    } catch (e) {
+        console.error('[NotificationService] Populate error:', e.message);
+    }
+    return savedOrder;
 }
 
 // @desc    Create Razorpay Order from server-calculated cart total
@@ -137,7 +149,8 @@ const createPaymentOrder = async (req, res) => {
                 address: shippingAddress.address,
                 city: shippingAddress.city,
                 postalCode: shippingAddress.postalCode,
-                country: shippingAddress.country || 'India'
+                country: shippingAddress.country || 'India',
+                phone: shippingAddress.phone || ''
             },
             paymentMethod: 'Razorpay',
             itemsPrice,

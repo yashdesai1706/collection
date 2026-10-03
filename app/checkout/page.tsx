@@ -18,6 +18,8 @@ export default function CheckoutPage() {
     const [city, setCity] = useState("");
     const [postalCode, setPostalCode] = useState("");
     const [country, setCountry] = useState("India");
+    const [phone, setPhone] = useState("");
+    const [confirmedOrder, setConfirmedOrder] = useState<{ id: string; amount: number } | null>(null);
     const [loading, setLoading] = useState(false);
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
     const [razorpayLoaded, setRazorpayLoaded] = useState(false);
@@ -27,6 +29,50 @@ export default function CheckoutPage() {
         message: string;
         action?: { label: string; onClick: () => void };
     } | null>(null);
+
+    if (confirmedOrder) {
+        return (
+            <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+                <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h1 className="text-3xl font-serif font-bold text-primary mb-2">Order Confirmed!</h1>
+                <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-6 my-6 text-left space-y-3">
+                    <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        <p className="font-semibold text-gray-900 text-sm">
+                            Your order is being processed soon
+                        </p>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                        🚚 <strong>Delivery Timeline:</strong> Your order will be carefully packaged and delivered within <strong>2-3 working days</strong>.
+                    </p>
+                    <p className="text-xs text-gray-500 font-mono">
+                        Order Reference: #{confirmedOrder.id}
+                    </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a
+                        href={`https://wa.me/919075271108?text=${encodeURIComponent(`Namaste Priti's Collection! I have confirmed my order #${confirmedOrder.id} for ₹${confirmedOrder.amount}. Please share my delivery updates here.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#25D366] text-white font-medium text-sm shadow hover:bg-[#20bd5a] transition-all"
+                    >
+                        <span>💬 Receive WhatsApp Updates</span>
+                    </a>
+                    <Link
+                        href="/profile"
+                        className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full bg-primary text-cream font-medium text-sm hover:bg-primary-light transition-all"
+                    >
+                        View in My Orders
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     if (cartItems.length === 0) {
         return (
@@ -68,7 +114,7 @@ export default function CheckoutPage() {
                     size: item.size || "Free Size",
                     color: item.color || null,
                 })),
-                shippingAddress: { address, city, postalCode, country },
+                shippingAddress: { address, city, postalCode, country, phone },
             };
 
             // 1. Create server-side order and Razorpay order (amounts computed exclusively from DB)
@@ -144,14 +190,11 @@ export default function CheckoutPage() {
 
                         // Payment & stock fulfillment complete
                         clearCart();
-                        setPaymentNotice({
-                            type: "success",
-                            message: "Payment successful! Your order has been placed."
+                        setConfirmedOrder({
+                            id: response.razorpay_order_id || paymentOrder.orderId,
+                            amount: paymentOrder.amount ? paymentOrder.amount / 100 : 0
                         });
-
-                        setTimeout(() => {
-                            router.push("/profile");
-                        }, 1200);
+                        setLoading(false);
                     } catch (err: any) {
                         console.error("Verification error:", err);
                         setPaymentNotice({
@@ -165,6 +208,7 @@ export default function CheckoutPage() {
                 prefill: {
                     name: user.name,
                     email: user.email,
+                    contact: phone,
                 },
 
                 theme: {
@@ -283,6 +327,15 @@ export default function CheckoutPage() {
                                 className="w-full border rounded-md px-3 py-2"
                             />
                         </div>
+
+                        <input
+                            required
+                            type="tel"
+                            placeholder="Mobile / WhatsApp Number (for order & delivery updates)"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full border rounded-md px-3 py-2 text-sm"
+                        />
 
                         <input
                             required

@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useAuthStore } from "@/store/authStore";
-import { getAdminOrders, markOrderDelivered } from "@/lib/api";
-import { Truck, CheckCircle2, Clock, Eye, X, MapPin, Receipt, ShieldCheck } from "lucide-react";
+import { getAdminOrders, markOrderDelivered, updateOrderStatus } from "@/lib/api";
+import { Truck, CheckCircle2, Clock, Eye, X, MapPin, Receipt, ShieldCheck, MessageCircle, Send } from "lucide-react";
 
 interface OrderItem {
     name: string;
@@ -22,11 +22,12 @@ interface ShippingAddress {
     city: string;
     postalCode: string;
     country: string;
+    phone?: string;
 }
 
 interface Order {
     _id: string;
-    user: { _id: string; name: string };
+    user: { _id: string; name: string; email?: string };
     orderItems: OrderItem[];
     shippingAddress: ShippingAddress;
     paymentResult?: {
@@ -42,6 +43,7 @@ interface Order {
     paidAt?: string;
     isDelivered: boolean;
     deliveredAt?: string;
+    status?: string;
     createdAt: string;
 }
 
@@ -52,8 +54,9 @@ export default function OrderList() {
     const [error, setError] = useState("");
     const [delivering, setDelivering] = useState<string | null>(null);
 
-    // Selected Order for the Inspection Drawer
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+    const [statusFeedback, setStatusFeedback] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user?.token) return;
@@ -63,20 +66,50 @@ export default function OrderList() {
             .finally(() => setLoading(false));
     }, [user?.token]);
 
-    const handleDeliver = async (orderId: string) => {
+    const handleStatusChange = async (orderId: string, newStatus: string) => {
         if (!user?.token) return;
-        setDelivering(orderId);
+        setUpdatingStatus(newStatus);
+        setStatusFeedback(null);
         try {
-            const updated = await markOrderDelivered(orderId, user.token);
-            setOrders(prev => prev.map(o => o._id === orderId ? { ...o, isDelivered: true, deliveredAt: updated.deliveredAt } : o));
+            const updated = await updateOrderStatus(orderId, newStatus, user.token);
+            setOrders(prev => prev.map(o => o._id === orderId ? {
+                ...o,
+                status: newStatus,
+                isDelivered: newStatus === 'Delivered',
+                deliveredAt: updated.deliveredAt
+            } : o));
             if (selectedOrder?._id === orderId) {
-                setSelectedOrder(prev => prev ? { ...prev, isDelivered: true, deliveredAt: updated.deliveredAt } : null);
+                setSelectedOrder(prev => prev ? {
+                    ...prev,
+                    status: newStatus,
+                    isDelivered: newStatus === 'Delivered',
+                    deliveredAt: updated.deliveredAt
+                } : null);
             }
+            setStatusFeedback(`Status updated to "${newStatus}". Notification email sent!`);
         } catch {
-            alert("Failed to mark as delivered");
+            alert("Failed to update order status");
         } finally {
-            setDelivering(null);
+            setUpdatingStatus(null);
         }
+    };
+
+    const getCustomerWhatsAppLink = (order: Order) => {
+        const rawPhone = order.shippingAddress?.phone;
+        if (!rawPhone) return null;
+        let digits = rawPhone.replace(/\D/g, '');
+        if (digits.length === 10) digits = '91' + digits;
+        const orderId = order._id.substring(order._id.length - 8).toUpperCase();
+        const customerName = order.user?.name || 'Customer';
+        const status = order.isDelivered ? 'Delivered' : (order.status || 'Processing');
+        
+        let msg = `Namaste ${customerName}! ✨\n\nYour order #${orderId} from *Priti's Collection* is confirmed and being processed soon.\n🚚 *Delivery:* Within 2-3 working days across India.\n\nThank you for choosing Priti's Collection!`;
+        if (status === 'Ready for Delivery') {
+            msg = `Namaste ${customerName}! ✨\n\nGreat news from *Priti's Collection*! 📦\nYour order #${orderId} is *ready for delivery* and dispatched for delivery within 2-3 working days.\n\nThank you for shopping with us!`;
+        } else if (status === 'Delivered') {
+            msg = `Namaste ${customerName}! ✨\n\nYour order #${orderId} from *Priti's Collection* has been *delivered*! 🎉\nWe hope you love your royal ethnic wear!\n\nThank you for choosing Priti's Collection.`;
+        }
+        return `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`;
     };
 
     if (loading) return <div className="text-gray-500 p-8">Loading order fulfillment center...</div>;
@@ -139,13 +172,17 @@ export default function OrderList() {
                                         )}
                                     </td>
                                     <td className="px-5 py-3.5 text-center">
-                                        {order.isDelivered ? (
-                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-800">
+                                        {order.isDelivered || order.status === 'Delivered' ? (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
                                                 Delivered
+                                            </span>
+                                        ) : order.status === 'Ready for Delivery' ? (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-900">
+                                                Ready for Delivery
                                             </span>
                                         ) : (
                                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800">
-                                                Processing
+                                                Processing Soon
                                             </span>
                                         )}
                                     </td>
@@ -214,6 +251,9 @@ export default function OrderList() {
                                         <p>{selectedOrder.shippingAddress?.address}</p>
                                         <p>{selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.postalCode}</p>
                                         <p className="font-medium text-gray-900">{selectedOrder.shippingAddress?.country || "India"}</p>
+                                        <p className="text-primary font-medium">
+                                            📱 {selectedOrder.shippingAddress?.phone ? selectedOrder.shippingAddress.phone : "No phone provided"}
+                                        </p>
                                     </div>
                                 </div>
 
@@ -301,26 +341,77 @@ export default function OrderList() {
                                 </div>
                             </div>
 
-                            {/* Drawer Footer Actions */}
-                            <div className="p-6 border-t border-gray-200 bg-gray-50 space-y-2">
-                                {!selectedOrder.isDelivered && selectedOrder.isPaid ? (
-                                    <button
-                                        type="button"
-                                        onClick={() => handleDeliver(selectedOrder._id)}
-                                        disabled={delivering === selectedOrder._id}
-                                        className="w-full py-3 rounded-full bg-primary text-cream font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-primary-light transition-all shadow-md disabled:opacity-50"
+                            {/* Drawer Footer & Tracking Actions */}
+                            <div className="p-6 border-t border-gray-200 bg-gray-50 space-y-3">
+                                {statusFeedback && (
+                                    <div className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-medium text-center">
+                                        {statusFeedback}
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <div className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                                        Order Tracking Stage (2-3 working days timeline)
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <button
+                                            type="button"
+                                            disabled={updatingStatus !== null || (!selectedOrder.isDelivered && selectedOrder.status === 'Processing')}
+                                            onClick={() => handleStatusChange(selectedOrder._id, 'Processing')}
+                                            className={`py-2 px-2 rounded-lg text-[11px] font-semibold transition-all ${
+                                                !selectedOrder.isDelivered && selectedOrder.status === 'Processing'
+                                                    ? 'bg-blue-600 text-white shadow-xs'
+                                                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            1. Processing Soon
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            disabled={updatingStatus !== null || selectedOrder.status === 'Ready for Delivery'}
+                                            onClick={() => handleStatusChange(selectedOrder._id, 'Ready for Delivery')}
+                                            className={`py-2 px-2 rounded-lg text-[11px] font-semibold transition-all ${
+                                                selectedOrder.status === 'Ready for Delivery' && !selectedOrder.isDelivered
+                                                    ? 'bg-amber-600 text-white shadow-xs'
+                                                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            2. Ready to Deliver
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            disabled={updatingStatus !== null || selectedOrder.isDelivered || selectedOrder.status === 'Delivered'}
+                                            onClick={() => handleStatusChange(selectedOrder._id, 'Delivered')}
+                                            className={`py-2 px-2 rounded-lg text-[11px] font-semibold transition-all ${
+                                                selectedOrder.isDelivered || selectedOrder.status === 'Delivered'
+                                                    ? 'bg-emerald-600 text-white shadow-xs'
+                                                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            3. Delivered
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* 1-Click WhatsApp Button to Customer */}
+                                {getCustomerWhatsAppLink(selectedOrder) ? (
+                                    <a
+                                        href={getCustomerWhatsAppLink(selectedOrder)!}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full py-2.5 rounded-full bg-[#25D366] text-white font-semibold text-xs flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-all shadow-xs"
                                     >
-                                        <Truck size={16} />
-                                        {delivering === selectedOrder._id ? "Updating Delivery..." : "Mark Parcel as Delivered"}
-                                    </button>
-                                ) : selectedOrder.isDelivered ? (
-                                    <div className="p-3 bg-emerald-50 text-emerald-800 rounded-lg text-xs font-semibold text-center flex items-center justify-center gap-2">
-                                        <CheckCircle2 size={16} /> Parcel Delivered to Customer
-                                    </div>
+                                        <MessageCircle size={15} />
+                                        Send WhatsApp Tracking to Customer
+                                    </a>
                                 ) : (
-                                    <div className="p-3 bg-amber-50 text-amber-800 rounded-lg text-xs font-semibold text-center">
-                                        Waiting for payment confirmation
-                                    </div>
+                                    <p className="text-[11px] text-gray-400 text-center italic">
+                                        No phone number saved for this order to send WhatsApp directly.
+                                    </p>
                                 )}
                             </div>
                         </div>
